@@ -1,0 +1,91 @@
+// src/components/layout/Navbar.tsx
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Search, PlusCircle, Menu } from "lucide-react";
+import { getUser } from "@/lib/auth";
+
+export default async function Navbar() {
+  const user = await getUser();
+  
+  return (
+    <header className="border-b bg-background">
+      <div className="container flex items-center justify-between h-16">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="font-bold text-xl">
+            CreativeCommunity
+          </Link>
+          
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="/explore" className="text-muted-foreground hover:text-foreground transition-colors">
+              Explore
+            </Link>
+            <Link href="/challenges" className="text-muted-foreground hover:text-foreground transition-colors">
+              Challenges
+            </Link>
+            <Link href="/creators" className="text-muted-foreground hover:text-foreground transition-colors">
+              Creators
+            </Link>
+          </nav>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" className="hidden md:flex">
+            <Search className="h-5 w-5" />
+            <span className="sr-only">Search</span>
+          </Button>
+          
+          {user ? (
+            <>
+              <Button asChild variant="ghost" size="icon" className="hidden md:flex">
+                <Link href="/create">
+                  <PlusCircle className="h-5 w-5" />
+                  <span className="sr-only">Create</span>
+                </Link>
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.image || ""} alt={user.name || "User"} />
+                      <AvatarFallback>
+                        {user.name?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href={`/user/${user.id}`}>Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/create">Create Post</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings">Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <form action="/api/auth/signout" method="post">
+                      <button type="submit" className="w-full text-left">Sign Out</button>
+                    </form>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <div className
