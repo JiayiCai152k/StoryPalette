@@ -34,6 +34,7 @@ export const initializeTypesense = async () => {
     await typesenseClient.collections('posts').retrieve();
     console.log('Posts collection already exists');
   } catch (err) {
+    console.log('Collection not found, creating new one:', err);
     await typesenseClient.collections().create(postsSchema);
     console.log('Created posts collection');
   }

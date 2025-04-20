@@ -2,11 +2,11 @@
 import { pgTable, serial, text, timestamp, integer, boolean, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-// Enums
+// 1. Enums first
 export const postTypeEnum = pgEnum('post_type', ['artwork', 'fiction']);
 export const roleEnum = pgEnum('role', ['user', 'admin', 'moderator']);
 
-// Tables
+// 2. Users table
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
@@ -15,6 +15,34 @@ export const users = pgTable('users', {
   image: text('image'),
   bio: text('bio'),
   role: roleEnum('role').default('user').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// 3. Posts table (before comments since comments references posts)
+export const posts = pgTable('posts', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  slug: text('slug').notNull().unique(),
+  description: text('description'),
+  content: text('content'),
+  type: postTypeEnum('type').notNull(),
+  imageUrl: text('image_url'),
+  imageDimensions: text('image_dimensions'),
+  medium: text('medium'),
+  published: boolean('published').default(true).notNull(),
+  authorId: integer('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// 4. Comments table
+export const comments = pgTable('comments', {
+  id: serial('id').primaryKey(),
+  content: text('content').notNull(),
+  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  authorId: integer('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  parentId: integer('parent_id').references(() => comments.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -34,22 +62,6 @@ export const accounts = pgTable('accounts', {
   session_state: text('session_state'),
 });
 
-export const posts = pgTable('posts', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  slug: text('slug').notNull().unique(),
-  description: text('description'),
-  content: text('content'),
-  type: postTypeEnum('type').notNull(),
-  imageUrl: text('image_url'),
-  imageDimensions: text('image_dimensions'),
-  medium: text('medium'),
-  published: boolean('published').default(true).notNull(),
-  authorId: integer('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
 export const tags = pgTable('tags', {
   id: serial('id').primaryKey(),
   name: text('name').notNull().unique(),
@@ -61,16 +73,6 @@ export const postsTags = pgTable('posts_tags', {
   id: serial('id').primaryKey(),
   postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
   tagId: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
-});
-
-export const comments = pgTable('comments', {
-  id: serial('id').primaryKey(),
-  content: text('content').notNull(),
-  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  authorId: integer('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  parentId: integer('parent_id').references(() => comments.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 export const likes = pgTable('likes', {

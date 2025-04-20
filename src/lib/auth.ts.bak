@@ -1,13 +1,17 @@
 // src/lib/auth.ts
-import { BetterAuth } from 'better-auth';
+import { betterAuth } from "better-auth"
 import { db } from '@/lib/db';
-import { users, accounts } from '@/lib/db/schema';
+import { users, accounts, type users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-export const auth = BetterAuth({
+export const auth = betterAuth({
   adapter: {
     // Create user
-    createUser: async (data) => {
+    createUser: async (data: {
+      name?: string | null
+      email: string
+      image?: string | null
+    }): Promise<typeof users.$inferSelect> => {
       const [user] = await db.insert(users).values({
         name: data.name,
         email: data.email,
