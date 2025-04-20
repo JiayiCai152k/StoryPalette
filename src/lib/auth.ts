@@ -1,0 +1,68 @@
+// src/lib/auth.ts
+import { BetterAuth } from 'better-auth';
+import { db } from '@/lib/db';
+import { users, accounts } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+
+export const auth = BetterAuth({
+  adapter: {
+    // Create user
+    createUser: async (data) => {
+      const [user] = await db.insert(users).values({
+        name: data.name,
+        email: data.email,
+        image: data.image,
+      }).returning();
+      return user;
+    },
+    
+    // Get user by email
+    getUserByEmail: async (email) => {
+      const user = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+      return user;
+    },
+    
+    // Get user by ID
+    getUserById: async (id) => {
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, id),
+      });
+      return user;
+    },
+    
+    // Link account
+    linkAccount: async (account) => {
+      await db.insert(accounts).values({
+        userId: account.userId,
+        type: account.type,
+        provider: account.provider,
+        providerAccountId: account.providerAccountId,
+        refresh_token: account.refresh_token,
+        access_token: account.access_token,
+        expires_at: account.expires_at,
+        token_type: account.token_type,
+        scope: account.scope,
+        id_token: account.id_token,
+        session_state: account.session_state,
+      });
+    },
+    
+    // Other adapter methods...
+  },
+  providers: [
+    // Configure your OAuth providers here
+    // Example:
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    // }),
+  ],
+  secret: process.env.AUTH_SECRET,
+  session: {
+    strategy: "jwt",
+  },
+});
+
+export const { getUser, signIn, signOut } = auth;
