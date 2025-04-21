@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Search, PlusCircle, Menu } from "lucide-react";
 
+
 export const Navbar = function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/60 backdrop-blur">
@@ -17,11 +18,11 @@ export const Navbar = function Navbar() {
             <Link href="/explore" className="text-muted-foreground hover:text-foreground transition-colors">
               Explore
             </Link>
-            <Link href="/challenges" className="text-muted-foreground hover:text-foreground transition-colors">
-              Challenges
-            </Link>
             <Link href="/creators" className="text-muted-foreground hover:text-foreground transition-colors">
               Creators
+            </Link>
+            <Link href="/profile" className="text-muted-foreground hover:text-foreground transition-colors">
+              Profile
             </Link>
           </nav>
         </div>
@@ -39,7 +40,8 @@ export const Navbar = function Navbar() {
             </Link>
           </Button>
           
-          <UserButton />
+          <UserButton 
+          />
           
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />
