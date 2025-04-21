@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Header } from "@/components/header";
+import { Navbar } from "@/components/layout/Navbar";
+import { Providers } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,6 +23,7 @@ export const metadata: Metadata = {
   description: 'A platform for creators to share and discover artwork and fiction',
 };
 
+// src/app/layout.tsx
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,9 +32,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        {children}
+        <Providers>
+          <div className="flex min-h-svh flex-col">
+            <Header />
+            <Navbar />
+            {children}
+          </div>
+                </Providers>
       </body>
     </html>
   );

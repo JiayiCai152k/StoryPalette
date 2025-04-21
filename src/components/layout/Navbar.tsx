@@ -4,13 +4,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Search, PlusCircle, Menu } from "lucide-react";
 
-export default function Navbar() {
+export const Navbar = function Navbar() {
   return (
-    <header className="border-b bg-background">
-      <div className="container flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 border-b bg-background/60 backdrop-blur">
+      <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-bold text-xl">
-            CreativeCommunity
+            Story Palette
           </Link>
           
           <nav className="hidden md:flex items-center gap-6">

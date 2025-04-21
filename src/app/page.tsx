@@ -8,9 +8,9 @@ import FeatureHighlights from "@/components/home/FeatureHighlights";
 
 export default function Home() {
   return (
-    <div className="container py-8">
+    <div className="container mx-auto py-8">
       <section className="flex flex-col items-center text-center py-12 space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">Creative Community</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">Story Palette</h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           Share your artwork and fiction, connect with creators, and find inspiration
         </p>
