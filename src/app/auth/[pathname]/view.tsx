@@ -22,7 +22,7 @@ export function AuthView({ pathname }: { pathname: string }) {
                 <p
                     className={cn(
                         ["callback", "settings", "sign-out"].includes(pathname) && "hidden",
-                        "text-muted-foreground text-xs text-center mt-4"
+                        "text-muted-foreground text-xs"
                     )}
                 >
                     Powered by{" "}
