@@ -36,11 +36,11 @@ export default function RootLayout({
       >
         <Providers>
           <div className="flex min-h-svh flex-col">
-            <Header />
+            {/* <Header /> */}
             <Navbar />
             {children}
           </div>
-                </Providers>
+          </Providers>
       </body>
     </html>
   );
