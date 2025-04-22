@@ -1,4 +1,6 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, uuid } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { posts, likes, comments } from "./content";
 
 export const users = pgTable("users", {
 					id: text('id').primaryKey(),
@@ -11,7 +13,11 @@ export const users = pgTable("users", {
  role: text('role'),
  banned: boolean('banned'),
  banReason: text('ban_reason'),
- banExpires: timestamp('ban_expires')
+ banExpires: timestamp('ban_expires'),
+ bio: text('bio'),
+ website: text('website'),
+ twitter: text('twitter'),
+ instagram: text('instagram'),
 				});
 
 export const sessions = pgTable("sessions", {
@@ -51,3 +57,19 @@ export const verifications = pgTable("verifications", {
  updatedAt: timestamp('updated_at')
 				});
 
+export const collections = pgTable("collections", {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  isPrivate: boolean('is_private').default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const usersRelations = relations(users, ({ many }) => ({
+  collections: many(collections),
+  posts: many(posts),
+  likes: many(likes),
+  comments: many(comments),
+}));

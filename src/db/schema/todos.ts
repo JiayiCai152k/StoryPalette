@@ -17,7 +17,7 @@ export const todos = pgTable("todos", {
         .references(() => users.id, { onDelete: "cascade" })
 })
 
-export const usersRelations = relations(users, ({ many }) => ({
+const usersToTodosRelations = relations(users, ({ many }) => ({
     todos: many(todos),
 }))
 
@@ -41,6 +41,5 @@ export const insertTodoSchema = createInsertSchema(todos, {
 export type NewTodo = z.infer<typeof insertTodoSchema>;
 
 export default {
-  users,
   todos
 };
