@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1745212118118,
-      "tag": "0000_tiny_scream",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1745378906543,
-      "tag": "0001_chilly_sandman",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1745379604133,
-      "tag": "0002_ordinary_marvex",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1745379989403,
-      "tag": "0003_complex_proemial_gods",
+      "when": 1745380542037,
+      "tag": "0000_groovy_dark_phoenix",
       "breakpoints": true
     }
   ]
