@@ -1,0 +1,134 @@
+import { db } from "@/db"
+import { users, posts, userFollows } from "@/db/schema"
+import { and, eq, desc } from "drizzle-orm"
+
+export class FollowService {
+  // Get all followers of a user
+  static async getFollowers(userId: string) {
+    return await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        followedAt: userFollows.createdAt,
+      })
+      .from(userFollows)
+      .innerJoin(users, eq(users.id, userFollows.followerId))
+      .where(eq(userFollows.followingId, userId));
+  }
+
+  // Get all users that a user is following
+  static async getFollowing(userId: string) {
+    return await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        followedAt: userFollows.createdAt,
+      })
+      .from(userFollows)
+      .innerJoin(users, eq(users.id, userFollows.followingId))
+      .where(eq(userFollows.followerId, userId));
+  }
+
+  // Follow a user
+  static async followUser(followerId: string, followingId: string) {
+    // Prevent self-following
+    if (followerId === followingId) {
+      throw new Error("Cannot follow yourself");
+    }
+
+    try {
+      await db.insert(userFollows).values({
+        followerId,
+        followingId,
+      });
+      return true;
+    } catch (error) {
+      // Handle unique constraint violation
+      if (error.code === '23505') { // PostgreSQL unique violation code
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  // Unfollow a user
+  static async unfollowUser(followerId: string, followingId: string) {
+    const result = await db
+      .delete(userFollows)
+      .where(
+        and(
+          eq(userFollows.followerId, followerId),
+          eq(userFollows.followingId, followingId)
+        )
+      );
+    return result.rowCount > 0;
+  }
+
+  // Check if user A follows user B
+  static async checkIfFollowing(followerId: string, followingId: string) {
+    const follow = await db
+      .select()
+      .from(userFollows)
+      .where(
+        and(
+          eq(userFollows.followerId, followerId),
+          eq(userFollows.followingId, followingId)
+        )
+      )
+      .limit(1);
+    
+    return follow.length > 0;
+  }
+
+  // Get feed of posts from followed users
+  static async getFollowingFeed(userId: string, page = 1, limit = 20) {
+    const offset = (page - 1) * limit;
+
+    return await db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        type: posts.type,
+        description: posts.description,
+        createdAt: posts.createdAt,
+        imageUrl: posts.imageUrl,
+        content: posts.content,
+        user: {
+          id: users.id,
+          name: users.name,
+          image: users.image,
+        },
+      })
+      .from(posts)
+      .innerJoin(users, eq(posts.userId, users.id))
+      .innerJoin(userFollows, eq(users.id, userFollows.followingId))
+      .where(eq(userFollows.followerId, userId))
+      .orderBy(desc(posts.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  // Get follower count
+  static async getFollowerCount(userId: string) {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, userId));
+    
+    return Number(result[0].count);
+  }
+
+  // Get following count
+  static async getFollowingCount(userId: string) {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, userId));
+    
+    return Number(result[0].count);
+  }
+}

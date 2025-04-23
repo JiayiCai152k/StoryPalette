@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, uuid, primaryKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { posts, likes, comments } from "./content";
 
@@ -67,9 +67,34 @@ export const collections = pgTable("collections", {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+export const userFollows = pgTable("user_follows", {
+  followerId: text('follower_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  followingId: text('following_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    pk: primaryKey({ columns: [table.followerId, table.followingId] }),
+  }
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   collections: many(collections),
   posts: many(posts),
   likes: many(likes),
   comments: many(comments),
+  followers: many(userFollows, { relationName: 'followers' }),
+  following: many(userFollows, { relationName: 'following' })
+}));
+
+export const userFollowsRelations = relations(userFollows, ({ one }) => ({
+  follower: one(users, {
+    fields: [userFollows.followerId],
+    references: [users.id],
+    relationName: 'following'
+  }),
+  following: one(users, {
+    fields: [userFollows.followingId],
+    references: [users.id],
+    relationName: 'followers'
+  })
 }));
