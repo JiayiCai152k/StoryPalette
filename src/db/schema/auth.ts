@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, boolean, integer, uuid, primaryKey } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { posts, likes, comments } from "./content";
+import { posts, likes, comments, collections } from "./content";
 
 export const users = pgTable("users", {
 					id: text('id').primaryKey(),
@@ -56,16 +56,6 @@ export const verifications = pgTable("verifications", {
  createdAt: timestamp('created_at'),
  updatedAt: timestamp('updated_at')
 				});
-
-export const collections = pgTable("collections", {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  description: text('description'),
-  isPrivate: boolean('is_private').default(false),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
 
 export const userFollows = pgTable("user_follows", {
   followerId: text('follower_id').notNull().references(() => users.id, { onDelete: 'cascade' }),

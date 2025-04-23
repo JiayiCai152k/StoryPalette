@@ -1,6 +1,7 @@
-import { pgTable, text, timestamp, uuid, varchar, jsonb, integer, pgEnum, index, primaryKey } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { users, collections } from "./auth";
+import { relations } from 'drizzle-orm';
+import { pgTable, text, timestamp, uuid, varchar, jsonb, integer, pgEnum, index, primaryKey, boolean } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { users } from "./auth";
 
 // Create a proper PostgreSQL enum
 export const postTypeEnum = pgEnum('post_type', ['ARTWORK', 'FICTION']);
@@ -14,16 +15,14 @@ export const posts = pgTable("posts", {
   description: text('description'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  // Type-specific fields
-  imageUrl: text('image_url'), // For artwork
-  imageKey: text('image_key'), // For artwork storage reference
-  caption: text('caption'),    // For artwork
-  content: text('content'),    // For fiction
-  summary: text('summary'),    // For fiction
-  wordCount: integer('word_count'), // For fiction
-  // Metadata
+  imageUrl: text('image_url'),
+  imageKey: text('image_key'),
+  caption: text('caption'),
+  content: text('content'),
+  summary: text('summary'),
+  wordCount: integer('word_count'),
   views: integer('views').default(0),
-  metadata: jsonb('metadata'), // For flexible additional data
+  metadata: jsonb('metadata'),
 });
 
 // Tags table
@@ -40,12 +39,44 @@ export const postTags = pgTable("post_tags", {
   tagId: uuid('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
 });
 
-// Export collection posts junction table
+// Collection posts junction table
 export const collectionPosts = pgTable("collection_posts", {
   collectionId: uuid('collection_id').notNull().references(() => collections.id, { onDelete: 'cascade' }),
   postId: uuid('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
   addedAt: timestamp('added_at').defaultNow().notNull(),
 });
+
+// Collections table
+export const collections = pgTable("collections", {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  isPrivate: boolean('is_private').default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Collections relations
+export const collectionsRelations = relations(collections, ({ one, many }) => ({
+  user: one(users, {
+    fields: [collections.userId],
+    references: [users.id],
+  }),
+  posts: many(collectionPosts),
+}));
+
+// Collection posts relations
+export const collectionPostsRelations = relations(collectionPosts, ({ one }) => ({
+  collection: one(collections, {
+    fields: [collectionPosts.collectionId],
+    references: [collections.id],
+  }),
+  post: one(posts, {
+    fields: [collectionPosts.postId],
+    references: [posts.id],
+  }),
+}));
 
 // Likes table
 export const likes = pgTable("likes", {
@@ -55,7 +86,7 @@ export const likes = pgTable("likes", {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Comments table - define first without the self-reference
+// Comments table
 export const comments = pgTable("comments", {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -63,38 +94,12 @@ export const comments = pgTable("comments", {
   content: text('content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  parentId: uuid('parent_id'),
+  parentId: uuid('parent_id').references(() => comments.id, { onDelete: 'cascade' }),
 });
 
 export type Comment = typeof comments.$inferSelect;
 
-// Relations
-export const postsRelations = relations(posts, ({ one, many }) => ({
-  user: one(users, {
-    fields: [posts.userId],
-    references: [users.id],
-  }),
-  tags: many(postTags),
-  likes: many(likes),
-  comments: many(comments),
-  collections: many(collectionPosts),
-}));
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-  posts: many(postTags),
-}));
-
-export const likesRelations = relations(likes, ({ one }) => ({
-  user: one(users, {
-    fields: [likes.userId],
-    references: [users.id],
-  }),
-  post: one(posts, {
-    fields: [likes.postId],
-    references: [posts.id],
-  }),
-}));
-
+// Comments relations
 export const commentsRelations = relations(comments, ({ one, many }) => ({
   user: one(users, {
     fields: [comments.userId],
@@ -107,26 +112,51 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   parent: one(comments, {
     fields: [comments.parentId],
     references: [comments.id],
+    relationName: 'parentChild'
   }),
-  replies: many(comments, { relationName: 'parent' }),
+  replies: many(comments, {
+    fields: [comments.id],
+    references: [comments.parentId],
+    relationName: 'parentChild'
+  }),
 }));
 
-// Add indexes for better performance
-export const postsIndexes = {
-  typeIndex: index('posts_type_idx').on(posts.type),
-  userIndex: index('posts_user_id_idx').on(posts.userId),
-  createdAtIndex: index('posts_created_at_idx').on(posts.createdAt),
-};
+// Posts relations
+export const postsRelations = relations(posts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [posts.userId],
+    references: [users.id],
+  }),
+  postTags: many(postTags),
+  likes: many(likes),
+  comments: many(comments),
+  collections: many(collectionPosts),
+}));
 
-export const likesIndexes = {
-  userPostIndex: index('likes_user_post_idx').on(likes.userId, likes.postId),
-};
+// Tags relations
+export const tagsRelations = relations(tags, ({ many }) => ({
+  postTags: many(postTags),
+}));
 
-export const commentsIndexes = {
-  postIndex: index('comments_post_id_idx').on(comments.postId),
-  userIndex: index('comments_user_id_idx').on(comments.userId),
-};
+// Post tags relations
+export const postTagsRelations = relations(postTags, ({ one }) => ({
+  post: one(posts, {
+    fields: [postTags.postId],
+    references: [posts.id],
+  }),
+  tag: one(tags, {
+    fields: [postTags.tagId],
+    references: [tags.id],
+  }),
+}));
 
-export const tagsIndexes = {
-  nameIndex: index('tags_name_idx').on(tags.name),
-};
+export const likesRelations = relations(likes, ({ one }) => ({
+  user: one(users, {
+    fields: [likes.userId],
+    references: [users.id],
+  }),
+  post: one(posts, {
+    fields: [likes.postId],
+    references: [posts.id],
+  }),
+}));
