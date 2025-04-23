@@ -15,10 +15,10 @@ export const posts = pgTable("posts", {
   description: text('description'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  imageUrl: text('image_url'),
+  imageUrl: text('image_url'),// will be url to the image
   imageKey: text('image_key'),
   caption: text('caption'),
-  content: text('content'),
+  content: text('content'), //will be url to the content
   summary: text('summary'),
   wordCount: integer('word_count'),
   views: integer('views').default(0),

@@ -43,3 +43,6 @@ next-env.d.ts
 
 #other
 .vscode/*
+
+#firebase admin sdk
+firebase-adminsdk.json

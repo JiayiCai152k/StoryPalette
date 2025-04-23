@@ -9,6 +9,7 @@ import { ImageUpload } from "@/components/upload/ImageUpload"
 import { TagInput } from "@/components/ui/tag-input"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { auth } from "@/lib/auth"
 
 // Popular art tags for suggestions
 const popularTags = [
@@ -22,6 +23,7 @@ export default function CreateArtworkPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [tags, setTags] = useState<string[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -33,6 +35,7 @@ export default function CreateArtworkPage() {
     setIsLoading(true)
     
     try {
+      // Create form data
       const formData = new FormData(e.currentTarget)
       formData.append('tags', JSON.stringify(tags))
       
@@ -43,7 +46,13 @@ export default function CreateArtworkPage() {
       })
       
       if (!response.ok) {
-        throw new Error('Failed to upload artwork')
+        const data = await response.json()
+        if (response.status === 401) {
+          // Handle unauthorized - redirect to login
+          router.push('/auth/signin')
+          return
+        }
+        throw new Error(data.error || 'Failed to upload artwork')
       }
       
       const data = await response.json()
@@ -53,6 +62,7 @@ export default function CreateArtworkPage() {
       alert('Failed to upload artwork. Please try again.')
     } finally {
       setIsLoading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -67,6 +77,18 @@ export default function CreateArtworkPage() {
             <ImageUpload 
               onImageSelect={(file) => setImageFile(file)} 
             />
+            
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+                <p className="text-sm text-gray-600 mt-1">
+                  Uploading: {Math.round(uploadProgress)}%
+                </p>
+              </div>
+            )}
             
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">
@@ -125,9 +147,13 @@ export default function CreateArtworkPage() {
             <Button 
               type="submit" 
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || !imageFile}
             >
-              {isLoading ? 'Publishing...' : 'Publish Artwork'}
+              {isLoading ? 
+                uploadProgress < 100 ? 
+                  'Uploading...' : 
+                  'Publishing...' 
+                : 'Publish Artwork'}
             </Button>
           </form>
         </CardContent>
