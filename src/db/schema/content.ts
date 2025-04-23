@@ -86,7 +86,7 @@ export const likes = pgTable("likes", {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Comments table
+// Comments table without parentId
 export const comments = pgTable("comments", {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -94,13 +94,12 @@ export const comments = pgTable("comments", {
   content: text('content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  parentId: uuid('parent_id').references(() => comments.id, { onDelete: 'cascade' }),
 });
 
 export type Comment = typeof comments.$inferSelect;
 
-// Comments relations
-export const commentsRelations = relations(comments, ({ one, many }) => ({
+// Comments relations without parent/replies
+export const commentsRelations = relations(comments, ({ one }) => ({
   user: one(users, {
     fields: [comments.userId],
     references: [users.id],
@@ -108,16 +107,6 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   post: one(posts, {
     fields: [comments.postId],
     references: [posts.id],
-  }),
-  parent: one(comments, {
-    fields: [comments.parentId],
-    references: [comments.id],
-    relationName: 'parentChild'
-  }),
-  replies: many(comments, {
-    fields: [comments.id],
-    references: [comments.parentId],
-    relationName: 'parentChild'
   }),
 }));
 
