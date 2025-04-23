@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { posts, postTags, tags } from "@/db/schema/content"
 import { sql } from "drizzle-orm"
+import { uploadImage } from "@/lib/utils/uploadImage"
 
 export async function POST(request: Request) {
   // Check authentication with auth.js
@@ -21,22 +22,37 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData()
     
-    // Extract data from formData
+    // Get the image file from form data
+    const imageFile = formData.get('image') as File
+    if (!imageFile) {
+      return NextResponse.json(
+        { error: 'No image provided' },
+        { status: 400 }
+      )
+    }
+
+    // 1. First upload the image to Firebase
+    const imageUrl = await uploadImage(
+      imageFile,
+      session.user.id, // Use authenticated user's ID
+      () => {} // Progress callback not needed on server
+    )
+
+    // 2. Extract other data from formData
     const title = formData.get('title') as string
     const description = formData.get('description') as string
     const caption = formData.get('caption') as string
-    const imageUrl = formData.get('imageUrl') as string
-    const imageKey = formData.get('imageKey') as string
+    const imageKey = `artworks/${session.user.id}/${Date.now()}-${imageFile.name}`
     const tagsList = JSON.parse(formData.get('tags') as string) as string[]
 
-    // Create the post with the authenticated user's ID
+    // 3. Create the post with the authenticated user's ID
     const [post] = await db.insert(posts).values({
       userId: session.user.id,
       type: "ARTWORK",
       title,
       description,
       caption,
-      imageUrl,
+      imageUrl, // Use the URL from Firebase
       imageKey,
       createdAt: new Date(),
       updatedAt: new Date(),

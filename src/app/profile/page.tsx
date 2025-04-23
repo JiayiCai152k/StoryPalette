@@ -42,13 +42,13 @@ export default async function ProfilePage() {
         <CardContent>
           <Tabs defaultValue="creations" className="w-full">
             <TabsList className="w-full justify-start">
-              <TabsTrigger value="creations" className="flex gap-2">
+              <TabsTrigger value="fictions" className="flex gap-2">
                 <PenSquare className="h-4 w-4" />
-                Creations
+                Fictions
               </TabsTrigger>
-              <TabsTrigger value="gallery" className="flex gap-2">
+              <TabsTrigger value="creations" className="flex gap-2">
                 <ImageIcon className="h-4 w-4" />
-                Gallery
+                Creations
               </TabsTrigger>
               <TabsTrigger value="collections" className="flex gap-2">
                 <BookmarkIcon className="h-4 w-4" />

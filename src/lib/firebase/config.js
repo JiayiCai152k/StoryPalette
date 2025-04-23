@@ -1,5 +1,8 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+//read dotenv
+import dotenv from 'dotenv';
+dotenv.config();
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use

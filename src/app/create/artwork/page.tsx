@@ -10,6 +10,7 @@ import { TagInput } from "@/components/ui/tag-input"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/auth"
+import { uploadImage } from "@/lib/utils/uploadImage"
 
 // Popular art tags for suggestions
 const popularTags = [
@@ -35,8 +36,9 @@ export default function CreateArtworkPage() {
     setIsLoading(true)
     
     try {
-      // Create form data
+      // Create form data with the file
       const formData = new FormData(e.currentTarget)
+      formData.append('image', imageFile) // Add the image file
       formData.append('tags', JSON.stringify(tags))
       
       // Send to your API
@@ -48,7 +50,6 @@ export default function CreateArtworkPage() {
       if (!response.ok) {
         const data = await response.json()
         if (response.status === 401) {
-          // Handle unauthorized - redirect to login
           router.push('/auth/signin')
           return
         }
