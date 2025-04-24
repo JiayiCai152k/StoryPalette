@@ -24,7 +24,7 @@ export default async function ProfilePage() {
     <main className="container mx-auto py-8">
       <Card className="max-w-4xl mx-auto">
         <CardHeader className="space-y-6">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex gap-4 items-center">
               <Avatar className="h-20 w-20">
                 <AvatarImage src={session.user.image || ""} alt={session.user.name || "User"} />
@@ -35,24 +35,27 @@ export default async function ProfilePage() {
                 <p className="text-muted-foreground">{session.user.email}</p>
               </div>
             </div>
-            <Button variant="outline">Edit Profile</Button>
+            <Button variant="outline" className="w-full sm:w-auto">Edit Profile</Button>
           </div>
         </CardHeader>
         
         <CardContent>
           <Tabs defaultValue="creations" className="w-full">
             <TabsList className="w-full justify-start">
-              <TabsTrigger value="fictions" className="flex gap-2">
+              <TabsTrigger value="fictions" className="flex items-center gap-2">
                 <PenSquare className="h-4 w-4" />
-                Fictions
+                <span className="hidden sm:inline">Fictions</span>
+                <span className="sr-only sm:hidden">Fictions</span>
               </TabsTrigger>
-              <TabsTrigger value="creations" className="flex gap-2">
+              <TabsTrigger value="creations" className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
-                Creations
+                <span className="hidden sm:inline">Creations</span>
+                <span className="sr-only sm:hidden">Creations</span>
               </TabsTrigger>
-              <TabsTrigger value="collections" className="flex gap-2">
+              <TabsTrigger value="collections" className="flex items-center gap-2">
                 <BookmarkIcon className="h-4 w-4" />
-                Collections
+                <span className="hidden sm:inline">Collections</span>
+                <span className="sr-only sm:hidden">Collections</span>
               </TabsTrigger>
             </TabsList>
             
