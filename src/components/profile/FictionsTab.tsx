@@ -63,66 +63,79 @@ export function FictionsTab() {
 
   return (
     <Tabs defaultValue="grid" className="w-full">
-      <TabsList className="w-full justify-start mb-4">
-        <TabsTrigger value="grid" className="flex gap-2">
-          <GridIcon className="h-4 w-4" />
-          Grid View
-        </TabsTrigger>
-        <TabsTrigger value="details" className="flex gap-2">
-          <ListIcon className="h-4 w-4" />
-          Details View
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="grid">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {fictionItems.map((fiction) => (
-            <Card 
-              key={fiction.id}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => handleFictionClick(fiction.id)}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-end gap-4 border-b pb-2">
+          <h3 className="text-sm font-medium">View:</h3>
+          <TabsList className="h-8 bg-transparent p-0">
+            <TabsTrigger 
+              value="grid" 
+              className="h-8 px-3 data-[state=active]:bg-accent"
             >
-              <CardHeader>
-                <CardTitle className="line-clamp-2">{fiction.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {fiction.summary && (
-                  <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
-                    {fiction.summary}
-                  </p>
-                )}
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
-                  <span>{fiction.createdAt.toLocaleDateString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              <GridIcon className="h-4 w-4 mr-2" />
+              Grid
+            </TabsTrigger>
+            <TabsTrigger 
+              value="details" 
+              className="h-8 px-3 data-[state=active]:bg-accent"
+            >
+              <ListIcon className="h-4 w-4 mr-2" />
+              List
+            </TabsTrigger>
+          </TabsList>
         </div>
-      </TabsContent>
 
-      <TabsContent value="details">
-        <div className="space-y-4">
-          {fictionItems.map((fiction) => (
-            <div 
-              key={fiction.id}
-              className="flex flex-col p-4 border rounded-lg hover:bg-accent cursor-pointer"
-              onClick={() => handleFictionClick(fiction.id)}
-            >
-              <h3 className="font-medium">{fiction.title}</h3>
-              {fiction.summary && (
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                  {fiction.summary}
-                </p>
-              )}
-              <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
-                <span>{fiction.createdAt.toLocaleDateString()}</span>
-              </div>
+        <div className="w-full">
+          <TabsContent value="grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {fictionItems.map((fiction) => (
+                <Card 
+                  key={fiction.id}
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => handleFictionClick(fiction.id)}
+                >
+                  <CardHeader>
+                    <CardTitle className="line-clamp-2">{fiction.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {fiction.summary && (
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
+                        {fiction.summary}
+                      </p>
+                    )}
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
+                      <span>{fiction.createdAt.toLocaleDateString()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          ))}
+          </TabsContent>
+
+          <TabsContent value="details">
+            <div className="space-y-4">
+              {fictionItems.map((fiction) => (
+                <div 
+                  key={fiction.id}
+                  className="flex flex-col p-4 border rounded-lg hover:bg-accent cursor-pointer"
+                  onClick={() => handleFictionClick(fiction.id)}
+                >
+                  <h3 className="font-medium">{fiction.title}</h3>
+                  {fiction.summary && (
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      {fiction.summary}
+                    </p>
+                  )}
+                  <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                    <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
+                    <span>{fiction.createdAt.toLocaleDateString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
         </div>
-      </TabsContent>
+      </div>
     </Tabs>
   )
 }
