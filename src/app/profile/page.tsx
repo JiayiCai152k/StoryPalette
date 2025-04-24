@@ -6,19 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PenSquare, ImageIcon, BookmarkIcon } from "lucide-react"
-import { headers } from "next/headers";
-import { db } from "@/db";
-import { eq } from "drizzle-orm";
+import { headers } from "next/headers"
+import { CreationsTab } from "@/components/profile/CreationsTab"
 
 export default async function ProfilePage() {
   const session = await auth.api.getSession(({
-    headers: await headers() // you need to pass the headers object.
-    }))
+    headers: await headers()
+  }))
 
   if (!session) {
     return <p className="text-center mt-10 text-gray-500">Please log in to view your profile.</p>
-    // or return null;
-    }
+  }
 
   return (
     <main className="container mx-auto py-8">
@@ -57,14 +55,12 @@ export default async function ProfilePage() {
             </TabsList>
             
             <TabsContent value="creations" className="mt-6">
-              <div className="grid gap-4">
-                <p className="text-muted-foreground">No creations yet</p>
-              </div>
+              <CreationsTab />
             </TabsContent>
             
-            <TabsContent value="gallery" className="mt-6">
+            <TabsContent value="fictions" className="mt-6">
               <div className="grid gap-4">
-                <p className="text-muted-foreground">No gallery items yet</p>
+                <p className="text-muted-foreground">No fictions yet</p>
               </div>
             </TabsContent>
             

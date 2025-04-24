@@ -83,7 +83,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ 
-      id: post.id,
+      success: true,
+      artworkId: post.id,
       message: 'Artwork created successfully' 
     })
 

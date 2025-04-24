@@ -58,10 +58,10 @@ export default function ArtworkClient({ id }: { id: string }) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              {artwork.user.image && (
+              {artwork.user?.image && (
                 <Image
                   src={artwork.user.image}
-                  alt={artwork.user.name}
+                  alt={artwork.user?.name || 'User'}
                   width={40}
                   height={40}
                   className="rounded-full"
@@ -70,7 +70,7 @@ export default function ArtworkClient({ id }: { id: string }) {
               <div>
                 <CardTitle>{artwork.title}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  by {artwork.user.name}
+                  by {artwork.user?.name || 'Anonymous'}
                 </p>
               </div>
             </div>
