@@ -88,35 +88,37 @@ export function ExploreArtworks() {
                 />
               </div>
               
-              <div className="p-3 flex-1">
-                <h3 className="font-semibold line-clamp-1 text-lg">
-                  {artwork.title}
-                </h3>
-                {artwork.caption && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                    {artwork.caption}
-                  </p>
-                )}
-              </div>
-
-              <div className="px-3 pb-2 flex items-center gap-2 mt-auto">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={artwork.user.image || ""} />
-                  <AvatarFallback>{artwork.user.name[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col min-w-0">
-                  <Link 
-                    href={`/profile/${artwork.user.id}`}
-                    className="text-sm font-medium hover:underline truncate leading-none"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {artwork.user.name}
-                  </Link>
-                  <span className="text-xs text-muted-foreground leading-tight">
-                    {new Date(artwork.createdAt).toLocaleDateString()}
-                  </span>
+              <CardContent className="flex flex-col flex-1 pb-0 pt-4">
+                <div className="flex-1 space-y-2">
+                  <h3 className="font-semibold line-clamp-1 text-lg">
+                    {artwork.title}
+                  </h3>
+                  {artwork.caption && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {artwork.caption}
+                    </p>
+                  )}
                 </div>
-              </div>
+
+                <div className="flex items-center gap-2 mt-auto pt-4">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={artwork.user.image || ""} />
+                    <AvatarFallback>{artwork.user.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col min-w-0">
+                    <Link 
+                      href={`/profile/${artwork.user.id}`}
+                      className="text-sm font-medium hover:underline truncate leading-none"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {artwork.user.name}
+                    </Link>
+                    <span className="text-xs text-muted-foreground leading-tight">
+                      {new Date(artwork.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
             </Link>
           </Card>
         ))}

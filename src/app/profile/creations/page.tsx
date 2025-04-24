@@ -16,6 +16,7 @@ type ArtworkGridItem = {
   title: string
   imageUrl: string
   caption?: string
+  createdAt: Date
 }
 
 export default function CreationsPage() {
@@ -55,7 +56,8 @@ export default function CreationsPage() {
       id: post.id,
       title: post.title,
       imageUrl: post.imageUrl,
-      caption: post.caption ?? undefined
+      caption: post.caption ?? undefined,
+      createdAt: new Date(post.createdAt)
     }))
 
   return (

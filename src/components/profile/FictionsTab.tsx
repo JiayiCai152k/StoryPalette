@@ -90,19 +90,19 @@ export function FictionsTab() {
               {fictionItems.map((fiction) => (
                 <Card 
                   key={fiction.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  className="cursor-pointer hover:shadow-lg transition-shadow flex flex-col"
                   onClick={() => handleFictionClick(fiction.id)}
                 >
                   <CardHeader>
                     <CardTitle className="line-clamp-2">{fiction.title}</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex flex-col flex-1">
                     {fiction.summary && (
-                      <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
                         {fiction.summary}
                       </p>
                     )}
-                    <div className="flex justify-between text-sm text-muted-foreground">
+                    <div className="flex justify-between text-sm text-muted-foreground mt-auto pt-4">
                       <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
                       <span>{fiction.createdAt.toLocaleDateString()}</span>
                     </div>
@@ -120,13 +120,15 @@ export function FictionsTab() {
                   className="flex flex-col p-4 border rounded-lg hover:bg-accent cursor-pointer"
                   onClick={() => handleFictionClick(fiction.id)}
                 >
-                  <h3 className="font-medium">{fiction.title}</h3>
-                  {fiction.summary && (
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                      {fiction.summary}
-                    </p>
-                  )}
-                  <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                  <div className="flex-1">
+                    <h3 className="font-medium">{fiction.title}</h3>
+                    {fiction.summary && (
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        {fiction.summary}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground mt-4">
                     <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
                     <span>{fiction.createdAt.toLocaleDateString()}</span>
                   </div>

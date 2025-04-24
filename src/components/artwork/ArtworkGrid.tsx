@@ -7,6 +7,7 @@ interface ArtworkGridProps {
     title: string
     imageUrl: string
     caption?: string
+    createdAt: Date
   }>
   onArtworkClick: (id: string) => void
 }
@@ -17,10 +18,10 @@ export function ArtworkGrid({ artworks, onArtworkClick }: ArtworkGridProps) {
       {artworks.map((artwork) => (
         <Card 
           key={artwork.id}
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+          className="cursor-pointer hover:shadow-lg transition-shadow h-full"
           onClick={() => onArtworkClick(artwork.id)}
         >
-          <CardContent className="p-4">
+          <CardContent className="p-4 flex flex-col h-full pb-0">
             <div className="relative aspect-square w-full mb-2">
               <Image
                 src={artwork.imageUrl}
@@ -29,12 +30,17 @@ export function ArtworkGrid({ artworks, onArtworkClick }: ArtworkGridProps) {
                 className="object-cover rounded-md"
               />
             </div>
-            <h3 className="font-medium truncate">{artwork.title}</h3>
-            {artwork.caption && (
-              <p className="text-sm text-muted-foreground truncate">
-                {artwork.caption}
-              </p>
-            )}
+            <div className="flex-1">
+              <h3 className="font-medium truncate">{artwork.title}</h3>
+              {artwork.caption && (
+                <p className="text-sm text-muted-foreground truncate">
+                  {artwork.caption}
+                </p>
+              )}
+            </div>
+            <div className="text-sm text-muted-foreground mt-auto pt-2">
+              {artwork.createdAt.toLocaleDateString()}
+            </div>
           </CardContent>
         </Card>
       ))}

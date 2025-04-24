@@ -13,6 +13,7 @@ type ArtworkGridItem = {
   title: string
   imageUrl: string
   caption?: string
+  createdAt: Date
 }
 
 export function CreationsTab() {
@@ -51,7 +52,8 @@ export function CreationsTab() {
       id: post.id,
       title: post.title,
       imageUrl: post.imageUrl,
-      caption: post.caption ?? undefined
+      caption: post.caption ?? undefined,
+      createdAt: new Date(post.createdAt)
     }))
 
   if (isLoading) return <div>Loading...</div>
