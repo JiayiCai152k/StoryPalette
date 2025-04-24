@@ -89,13 +89,13 @@ export const Navbar = function Navbar() {
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Create
                 </Link>
-                <Button 
-                  variant="ghost" 
-                  className="justify-start h-12 px-4 font-medium text-muted-foreground hover:text-accent-foreground"
+                <Link 
+                  href="/search"
+                  className="flex items-center h-12 px-4 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
                   <Search className="h-4 w-4 mr-2" />
                   Search
-                </Button>
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
