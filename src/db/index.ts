@@ -4,7 +4,33 @@ import { neonConfig, Pool } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { WebSocket } from 'ws';
 
-import * as schema from './schema';
+// Import all tables and relations
+import { 
+  posts,
+  postsRelations,
+  tags,
+  tagsRelations,
+  postTags,
+  postTagsRelations,
+  likes,
+  likesRelations,
+  comments,
+  commentsRelations,
+  collections,
+  collectionsRelations,
+  collectionPosts,
+  collectionPostsRelations
+} from './schema/content';
+
+import {
+  users,
+  usersRelations,
+  sessions,
+  accounts,
+  verifications,
+  userFollows,
+  userFollowsRelations
+} from './schema/auth';
 
 const connectionString =
   process.env.NODE_ENV === 'production' ? process.env.DATABASE_URL : process.env.LOCAL_DATABASE_URL;
@@ -21,4 +47,20 @@ if (process.env.NODE_ENV === 'production') {
 
 const pool = new Pool({ connectionString });
 
-export const db = drizzle(pool, { schema });
+// Create the db instance with schema and relations
+export const db = drizzle(pool, { 
+  schema: {
+    posts,
+    tags,
+    postTags,
+    likes,
+    comments,
+    collections,
+    collectionPosts,
+    users,
+    sessions,
+    accounts,
+    verifications,
+    userFollows
+  }
+});

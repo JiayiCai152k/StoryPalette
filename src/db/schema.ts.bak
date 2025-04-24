@@ -1,168 +1,53 @@
-// src/lib/db/schema.ts
-import { pgTable, serial, text, timestamp, integer, boolean, pgEnum } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+/* eslint-disable */
+import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 
-// 1. Enums first
-export const postTypeEnum = pgEnum('post_type', ['artwork', 'fiction']);
-export const roleEnum = pgEnum('role', ['user', 'admin', 'moderator']);
+export const users = pgTable("users", {
+					id: text('id').primaryKey(),
+					name: text('name').notNull(),
+ email: text('email').notNull().unique(),
+ emailVerified: boolean('email_verified').notNull(),
+ image: text('image'),
+ createdAt: timestamp('created_at').notNull(),
+ updatedAt: timestamp('updated_at').notNull(),
+ role: text('role'),
+ banned: boolean('banned'),
+ banReason: text('ban_reason'),
+ banExpires: timestamp('ban_expires')
+				});
 
-// 2. Users table
-export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  emailVerified: timestamp('email_verified'),
-  image: text('image'),
-  bio: text('bio'),
-  role: roleEnum('role').default('user').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const sessions = pgTable("sessions", {
+					id: text('id').primaryKey(),
+					expiresAt: timestamp('expires_at').notNull(),
+ token: text('token').notNull().unique(),
+ createdAt: timestamp('created_at').notNull(),
+ updatedAt: timestamp('updated_at').notNull(),
+ ipAddress: text('ip_address'),
+ userAgent: text('user_agent'),
+ userId: text('user_id').notNull().references(()=> users.id, { onDelete: 'cascade' }),
+ impersonatedBy: text('impersonated_by')
+				});
 
-// 3. Posts table (before comments since comments references posts)
-export const posts = pgTable('posts', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  slug: text('slug').notNull().unique(),
-  description: text('description'),
-  content: text('content'),
-  type: postTypeEnum('type').notNull(),
-  imageUrl: text('image_url'),
-  imageDimensions: text('image_dimensions'),
-  medium: text('medium'),
-  published: boolean('published').default(true).notNull(),
-  authorId: integer('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+export const accounts = pgTable("accounts", {
+					id: text('id').primaryKey(),
+					accountId: text('account_id').notNull(),
+ providerId: text('provider_id').notNull(),
+ userId: text('user_id').notNull().references(()=> users.id, { onDelete: 'cascade' }),
+ accessToken: text('access_token'),
+ refreshToken: text('refresh_token'),
+ idToken: text('id_token'),
+ accessTokenExpiresAt: timestamp('access_token_expires_at'),
+ refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+ scope: text('scope'),
+ password: text('password'),
+ createdAt: timestamp('created_at').notNull(),
+ updatedAt: timestamp('updated_at').notNull()
+				});
 
-// 4. Comments table
-export const comments = pgTable('comments', {
-  id: serial('id').primaryKey(),
-  content: text('content').notNull(),
-  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  authorId: integer('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  parentId: integer('parent_id').references(() => comments.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
-export const accounts = pgTable('accounts', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  type: text('type').notNull(),
-  provider: text('provider').notNull(),
-  providerAccountId: text('provider_account_id').notNull(),
-  refresh_token: text('refresh_token'),
-  access_token: text('access_token'),
-  expires_at: integer('expires_at'),
-  token_type: text('token_type'),
-  scope: text('scope'),
-  id_token: text('id_token'),
-  session_state: text('session_state'),
-});
-
-export const tags = pgTable('tags', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull().unique(),
-  slug: text('slug').notNull().unique(),
-  count: integer('count').default(0).notNull(),
-});
-
-export const postsTags = pgTable('posts_tags', {
-  id: serial('id').primaryKey(),
-  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  tagId: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
-});
-
-export const likes = pgTable('likes', {
-  id: serial('id').primaryKey(),
-  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-export const collections = pgTable('collections', {
-  id: serial('id').primaryKey(),
-  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-export const follows = pgTable('follows', {
-  id: serial('id').primaryKey(),
-  followerId: integer('follower_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  followingId: integer('following_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-export const challenges = pgTable('challenges', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  description: text('description').notNull(),
-  prompt: text('prompt').notNull(),
-  startDate: timestamp('start_date').notNull(),
-  endDate: timestamp('end_date').notNull(),
-  createdBy: integer('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
-export const challengeEntries = pgTable('challenge_entries', {
-  id: serial('id').primaryKey(),
-  challengeId: integer('challenge_id').notNull().references(() => challenges.id, { onDelete: 'cascade' }),
-  postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-// Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  posts: many(posts),
-  comments: many(comments),
-  likes: many(likes),
-  collections: many(collections),
-  followedBy: many(follows, { relationName: "following" }),
-  following: many(follows, { relationName: "followers" }),
-}));
-
-export const postsRelations = relations(posts, ({ one, many }) => ({
-  author: one(users, {
-    fields: [posts.authorId],
-    references: [users.id],
-  }),
-  comments: many(comments),
-  likes: many(likes),
-  collections: many(collections),
-  tags: many(postsTags),
-}));
-
-export const commentsRelations = relations(comments, ({ one, many }) => ({
-  post: one(posts, {
-    fields: [comments.postId],
-    references: [posts.id],
-  }),
-  author: one(users, {
-    fields: [comments.authorId],
-    references: [users.id],
-  }),
-  parent: one(comments, {
-    fields: [comments.parentId],
-    references: [comments.id],
-  }),
-  replies: many(comments, { relationName: "parent" }),
-}));
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-  posts: many(postsTags),
-}));
-
-export const postsTagsRelations = relations(postsTags, ({ one }) => ({
-  post: one(posts, {
-    fields: [postsTags.postId],
-    references: [posts.id],
-  }),
-  tag: one(tags, {
-    fields: [postsTags.tagId],
-    references: [tags.id],
-  }),
-}));
+export const verifications = pgTable("verifications", {
+					id: text('id').primaryKey(),
+					identifier: text('identifier').notNull(),
+ value: text('value').notNull(),
+ expiresAt: timestamp('expires_at').notNull(),
+ createdAt: timestamp('created_at'),
+ updatedAt: timestamp('updated_at')
+				});
