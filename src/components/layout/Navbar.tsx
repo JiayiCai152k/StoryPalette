@@ -3,7 +3,14 @@ import { UserButton } from "@daveyplate/better-auth-ui"
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Search, PlusCircle, Menu } from "lucide-react";
-
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetDescription,
+} from "@/components/ui/sheet"
 
 export const Navbar = function Navbar() {
   return (
@@ -40,13 +47,58 @@ export const Navbar = function Navbar() {
             </Link>
           </Button>
           
-          <UserButton 
-          />
+          <UserButton />
           
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Menu</span>
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+                <SheetDescription>
+                  Check out new stories, creators, and more.
+                </SheetDescription>
+              </SheetHeader>
+              <nav className="flex flex-col mt-6">
+                <Link 
+                  href="/explore" 
+                  className="flex items-center h-12 px-4 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Explore
+                </Link>
+                <Link 
+                  href="/creators" 
+                  className="flex items-center h-12 px-4 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Creators
+                </Link>
+                <Link 
+                  href="/profile" 
+                  className="flex items-center h-12 px-4 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Profile
+                </Link>
+                <Link 
+                  href="/create" 
+                  className="flex items-center h-12 px-4 rounded-md text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Create
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  className="justify-start h-12 px-4 font-medium text-muted-foreground hover:text-accent-foreground"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
+                </Button>
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
