@@ -12,6 +12,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { BookOpen } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 type Fiction = {
   id: string
@@ -30,6 +31,7 @@ export function ExploreFictions() {
   const [fictions, setFictions] = useState<Fiction[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [sortBy, setSortBy] = useState("recent")
+  const router = useRouter()
 
   useEffect(() => {
     const fetchFictions = async () => {
@@ -74,33 +76,39 @@ export function ExploreFictions() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {fictions.map((fiction) => (
           <Card key={fiction.id} className="hover:shadow-lg transition-shadow">
-            <Link href={`/profile/fictions/${fiction.id}`} className="flex flex-col h-full">
+            <div className="flex flex-col h-full">
               <CardHeader>
-                <CardTitle className="line-clamp-2">{fiction.title}</CardTitle>
+                <Link href={`/profile/fictions/${fiction.id}`}>
+                  <CardTitle className="line-clamp-2">{fiction.title}</CardTitle>
+                </Link>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Link 
-                    href={`/profile/${fiction.user.id}`} 
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push(`/profile/${fiction.user.id}`);
+                    }}
                     className="hover:underline"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     {fiction.user.name}
-                  </Link>
+                  </button>
                   <span>•</span>
                   <span>{new Date(fiction.createdAt).toLocaleDateString()}</span>
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col flex-1">
                 {fiction.summary && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {fiction.summary}
-                  </p>
+                  <Link href={`/profile/fictions/${fiction.id}`}>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                      {fiction.summary}
+                    </p>
+                  </Link>
                 )}
                 <div className="flex items-center text-sm text-muted-foreground mt-auto">
                   <BookOpen className="h-4 w-4 mr-2" />
                   <span>{fiction.wordCount?.toLocaleString() ?? 0} words</span>
                 </div>
               </CardContent>
-            </Link>
+            </div>
           </Card>
         ))}
       </div>

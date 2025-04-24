@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import Image from "next/image"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useRouter } from "next/navigation"
 
 type Artwork = {
   id: string
@@ -31,6 +32,7 @@ export function ExploreArtworks() {
   const [artworks, setArtworks] = useState<Artwork[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [sortBy, setSortBy] = useState("recent")
+  const router = useRouter()
 
   useEffect(() => {
     const fetchArtworks = async () => {
@@ -77,27 +79,31 @@ export function ExploreArtworks() {
             key={artwork.id} 
             className="group overflow-hidden bg-card hover:shadow-lg transition-all duration-300"
           >
-            <Link href={`/profile/creations/${artwork.id}`} className="flex flex-col h-full">
-              <div className="aspect-square relative overflow-hidden">
-                <Image
-                  src={artwork.imageUrl}
-                  alt={artwork.title}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              </div>
+            <div className="flex flex-col h-full">
+              <Link href={`/profile/creations/${artwork.id}`} className="block">
+                <div className="aspect-square relative overflow-hidden">
+                  <Image
+                    src={artwork.imageUrl}
+                    alt={artwork.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+              </Link>
               
               <CardContent className="flex flex-col flex-1 pb-0 pt-4">
                 <div className="flex-1 space-y-2">
-                  <h3 className="font-semibold line-clamp-1 text-lg">
-                    {artwork.title}
-                  </h3>
-                  {artwork.caption && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {artwork.caption}
-                    </p>
-                  )}
+                  <Link href={`/profile/creations/${artwork.id}`}>
+                    <h3 className="font-semibold line-clamp-1 text-lg">
+                      {artwork.title}
+                    </h3>
+                    {artwork.caption && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {artwork.caption}
+                      </p>
+                    )}
+                  </Link>
                 </div>
 
                 <div className="flex items-center gap-2 mt-auto pt-4">
@@ -106,20 +112,22 @@ export function ExploreArtworks() {
                     <AvatarFallback>{artwork.user.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col min-w-0">
-                    <Link 
-                      href={`/profile/${artwork.user.id}`}
-                      className="text-sm font-medium hover:underline truncate leading-none"
-                      onClick={(e) => e.stopPropagation()}
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(`/profile/${artwork.user.id}`);
+                      }}
+                      className="text-sm font-medium hover:underline truncate text-left leading-none"
                     >
                       {artwork.user.name}
-                    </Link>
+                    </button>
                     <span className="text-xs text-muted-foreground leading-tight">
                       {new Date(artwork.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
               </CardContent>
-            </Link>
+            </div>
           </Card>
         ))}
       </div>
