@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { TagInput } from "@/components/ui/tag-input"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { uploadFiction } from "@/lib/utils/uploadFiction"
 
 // Popular fiction tags for suggestions
 const popularTags = [
@@ -20,6 +21,7 @@ export default function CreateFictionPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [tags, setTags] = useState<string[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -27,6 +29,22 @@ export default function CreateFictionPage() {
     
     try {
       const formData = new FormData(e.currentTarget)
+      const content = formData.get('content') as string
+      
+      if (!content) {
+        throw new Error('Content is required')
+      }
+
+      // First upload the content to Firebase
+      const { url: contentUrl, wordCount } = await uploadFiction(
+        content,
+        'temp-user-id', // This will be replaced with actual user ID in the API
+        (progress) => setUploadProgress(progress)
+      )
+
+      // Add the content URL and word count to the form data
+      formData.append('contentUrl', contentUrl)
+      formData.append('wordCount', wordCount.toString())
       formData.append('tags', JSON.stringify(tags))
       
       // Send to your API
@@ -35,17 +53,24 @@ export default function CreateFictionPage() {
         body: formData,
       })
       
-      if (!response.ok) {
-        throw new Error('Failed to publish story')
-      }
-      
       const data = await response.json()
-      router.push(`/fiction/${data.id}`)
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to publish story')
+      }
+
+      // Navigate to the new fiction page
+      router.push(`/profile/fictions/${data.fictionId}`)
+      
+      // Refresh the router cache
+      router.refresh()
+
     } catch (error) {
       console.error('Publish error:', error)
       alert('Failed to publish story. Please try again.')
     } finally {
       setIsLoading(false)
+      setUploadProgress(0)
     }
   }
 
@@ -94,6 +119,18 @@ export default function CreateFictionPage() {
               />
             </div>
 
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+                <p className="text-sm text-gray-600 mt-1">
+                  Uploading: {Math.round(uploadProgress)}%
+                </p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-sm font-medium">
                 Tags
@@ -118,7 +155,11 @@ export default function CreateFictionPage() {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? 'Publishing...' : 'Publish Story'}
+              {isLoading ? 
+                uploadProgress < 100 ? 
+                  'Uploading...' : 
+                  'Publishing...' 
+                : 'Publish Story'}
             </Button>
           </form>
         </CardContent>

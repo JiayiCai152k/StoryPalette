@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PenSquare, ImageIcon, BookmarkIcon } from "lucide-react"
 import { headers } from "next/headers"
 import { CreationsTab } from "@/components/profile/CreationsTab"
+import { FictionsTab } from "@/components/profile/FictionsTab"
+import Link from "next/link"
 
 export default async function ProfilePage() {
   const session = await auth.api.getSession(({
@@ -59,9 +61,7 @@ export default async function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="fictions" className="mt-6">
-              <div className="grid gap-4">
-                <p className="text-muted-foreground">No fictions yet</p>
-              </div>
+              <FictionsTab />
             </TabsContent>
             
             <TabsContent value="collections" className="mt-6">
