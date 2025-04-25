@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { Globe, Twitter, Instagram } from "lucide-react"
 import Link from "next/link"
+import { BioDialog } from "./BioDialog"
 
 type UserProfileData = {
   id: string
@@ -69,9 +70,15 @@ export function UserProfile({
 
   if (showOnlyBio) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 max-w-2xl mx-auto">
         {profile.bio ? (
-          <p className="text-muted-foreground">{profile.bio}</p>
+          <div className="text-muted-foreground">
+            {profile.bio.split('\n').map((line, i) => (
+              <p key={i} className="mb-2">
+                {line}
+              </p>
+            ))}
+          </div>
         ) : (
           <p className="text-muted-foreground italic">No bio available</p>
         )}
@@ -91,11 +98,11 @@ export function UserProfile({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold">{profile.name}</h1>
-              <div className="mt-2 text-muted-foreground">
+              <div className="mt-2">
                 {profile.bio ? (
-                  <p>{truncateBio(profile.bio)}</p>
+                  <BioDialog bio={profile.bio} name={profile.name} />
                 ) : (
-                  <p className="italic">No bio available</p>
+                  <p className="text-sm text-muted-foreground italic">No bio available</p>
                 )}
               </div>
             </div>
