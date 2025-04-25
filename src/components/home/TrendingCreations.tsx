@@ -7,6 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { BookOpen, ImageIcon } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useRouter } from "next/navigation"
 
 type Artwork = {
   id: string
@@ -33,6 +34,7 @@ type Fiction = {
 }
 
 export default function TrendingCreations() {
+  const router = useRouter()
   const [artwork, setArtwork] = useState<Artwork | null>(null)
   const [fiction, setFiction] = useState<Fiction | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -57,6 +59,12 @@ export default function TrendingCreations() {
     fetchTrending()
   }, [])
 
+  const handleUserClick = (e: React.MouseEvent, userId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/profile/${userId}`)
+  }
+
   if (isLoading) {
     return (
       <section className="py-12">
@@ -75,77 +83,83 @@ export default function TrendingCreations() {
       <h2 className="text-3xl font-bold text-center mb-6">Trending Now</h2>
       <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto auto-rows-auto">
         {artwork && (
-          <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 h-fit">
-            <div className="relative w-full h-32">
-              <Image
-                src={artwork.imageUrl}
-                alt={artwork.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
-            </div>
-            <CardHeader className="pb-1 px-4 pt-2">
-              <CardTitle className="line-clamp-4 text-base">
-                <Link href={`/profile/creations/${artwork.id}`} className="hover:underline">
+          <Link href={`/profile/creations/${artwork.id}`} className="block group">
+            <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 h-fit">
+              <div className="relative w-full h-32">
+                <Image
+                  src={artwork.imageUrl}
+                  alt={artwork.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+              <CardHeader className="pb-1 px-4 pt-2">
+                <CardTitle className="line-clamp-4 text-base">
                   {artwork.title}
-                </Link>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col px-4 pt-0">
-              {artwork.caption && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                  {artwork.caption}
-                </p>
-              )}
-              {artwork.user && (
-                <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
-                  <div className="flex items-center gap-2">
-                    <Link href={`/profile/${artwork.user.id}`} className="hover:underline">
-                      {artwork.user.name}
-                    </Link>
-                    <span>•</span>
-                    <time>{new Date(artwork.createdAt).toLocaleDateString()}</time>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col px-4 pt-0">
+                {artwork.caption && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                    {artwork.caption}
+                  </p>
+                )}
+                {artwork.user && (
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => handleUserClick(e, artwork.user.id)}
+                        className="hover:underline"
+                      >
+                        {artwork.user.name}
+                      </button>
+                      <span>•</span>
+                      <time>{new Date(artwork.createdAt).toLocaleDateString()}</time>
+                    </div>
+                    <ImageIcon className="h-4 w-4" />
                   </div>
-                  <ImageIcon className="h-4 w-4" />
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
         )}
 
         {fiction && (
-          <Card className="hover:shadow-lg transition-shadow h-fit">
-            <CardHeader className="pb-1 px-4 pt-2">
-              <CardTitle className="line-clamp-4 text-base">
-                <Link href={`/profile/fictions/${fiction.id}`} className="hover:underline">
+          <Link href={`/profile/fictions/${fiction.id}`} className="block group">
+            <Card className="hover:shadow-lg transition-shadow h-fit">
+              <CardHeader className="pb-1 px-4 pt-2">
+                <CardTitle className="line-clamp-4 text-base">
                   {fiction.title}
-                </Link>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col px-4 pt-0">
-              {fiction.summary && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                  {fiction.summary}
-                </p>
-              )}
-              {fiction.user && (
-                <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
-                  <div className="flex items-center gap-2">
-                    <Link href={`/profile/${fiction.user.id}`} className="hover:underline">
-                      {fiction.user.name}
-                    </Link>
-                    <span>•</span>
-                    <time>{new Date(fiction.createdAt).toLocaleDateString()}</time>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col px-4 pt-0">
+                {fiction.summary && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                    {fiction.summary}
+                  </p>
+                )}
+                {fiction.user && (
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => handleUserClick(e, fiction.user.id)}
+                        className="hover:underline"
+                      >
+                        {fiction.user.name}
+                      </button>
+                      <span>•</span>
+                      <time>{new Date(fiction.createdAt).toLocaleDateString()}</time>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
+                      <BookOpen className="h-4 w-4" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
-                    <BookOpen className="h-4 w-4" />
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </Link>
         )}
 
         <Card className="hover:shadow-lg transition-shadow h-fit flex flex-col justify-center items-center">
