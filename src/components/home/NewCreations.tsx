@@ -84,16 +84,16 @@ export default function NewCreations() {
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
-            <CardHeader>
-              <CardTitle className="line-clamp-2">
+            <CardHeader className="pb-2 px-4 pt-3">
+              <CardTitle className="line-clamp-4 text-base">
                 <Link href={`/profile/creations/${artwork.id}`} className="hover:underline">
                   {artwork.title}
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col h-full px-4 pt-0">
               {artwork.caption && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {artwork.caption}
                 </p>
               )}
@@ -115,16 +115,16 @@ export default function NewCreations() {
 
         {fiction && (
           <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="line-clamp-2">
+            <CardHeader className="pb-2 px-4 pt-3">
+              <CardTitle className="line-clamp-4 text-base">
                 <Link href={`/profile/fictions/${fiction.id}`} className="hover:underline">
                   {fiction.title}
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col h-full px-4 pt-0">
               {fiction.summary && (
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {fiction.summary}
                 </p>
               )}
@@ -137,7 +137,7 @@ export default function NewCreations() {
                     <span>•</span>
                     <time>{new Date(fiction.createdAt).toLocaleDateString()}</time>
                   </div>
-                  <div className="flex items-center gap-2 mt-auto">
+                  <div className="flex items-center gap-2">
                     <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
                     <BookOpen className="h-4 w-4" />
                   </div>

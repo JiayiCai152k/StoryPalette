@@ -13,6 +13,11 @@ type Artwork = {
   title: string
   imageUrl: string
   caption?: string
+  user: {
+    id: string
+    name: string
+  }
+  createdAt: string
 }
 
 type Fiction = {
@@ -20,6 +25,11 @@ type Fiction = {
   title: string
   summary?: string
   wordCount: number
+  user: {
+    id: string
+    name: string
+  }
+  createdAt: string
 }
 
 export default function TrendingCreations() {
@@ -74,42 +84,65 @@ export default function TrendingCreations() {
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
-            <CardHeader>
-              <CardTitle className="line-clamp-2">
+            <CardHeader className="pb-1 px-4 pt-2">
+              <CardTitle className="line-clamp-4 text-base">
                 <Link href={`/profile/creations/${artwork.id}`} className="hover:underline">
                   {artwork.title}
                 </Link>
               </CardTitle>
             </CardHeader>
-            {artwork.caption && (
-              <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground line-clamp-2">
+            <CardContent className="flex flex-col h-full px-4 pt-0">
+              {artwork.caption && (
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {artwork.caption}
                 </p>
-              </CardContent>
-            )}
+              )}
+              {artwork.user && (
+                <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
+                  <div className="flex items-center gap-2">
+                    <Link href={`/profile/${artwork.user.id}`} className="hover:underline">
+                      {artwork.user.name}
+                    </Link>
+                    <span>•</span>
+                    <time>{new Date(artwork.createdAt).toLocaleDateString()}</time>
+                  </div>
+                  <ImageIcon className="h-4 w-4" />
+                </div>
+              )}
+            </CardContent>
           </Card>
         )}
 
         {fiction && (
           <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="line-clamp-2">
+            <CardHeader className="pb-1 px-4 pt-2">
+              <CardTitle className="line-clamp-4 text-base">
                 <Link href={`/profile/fictions/${fiction.id}`} className="hover:underline">
                   {fiction.title}
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col h-full px-4 pt-0">
               {fiction.summary && (
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {fiction.summary}
                 </p>
               )}
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
-                <BookOpen className="h-4 w-4" />
-              </div>
+              {fiction.user && (
+                <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
+                  <div className="flex items-center gap-2">
+                    <Link href={`/profile/${fiction.user.id}`} className="hover:underline">
+                      {fiction.user.name}
+                    </Link>
+                    <span>•</span>
+                    <time>{new Date(fiction.createdAt).toLocaleDateString()}</time>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
