@@ -21,7 +21,13 @@ type UserProfileData = {
   }
 }
 
-export function UserProfile({ userId }: { userId: string }) {
+export function UserProfile({ 
+  userId, 
+  showOnlyBio = false 
+}: { 
+  userId: string
+  showOnlyBio?: boolean 
+}) {
   const [profile, setProfile] = useState<UserProfileData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFollowing, setIsFollowing] = useState(false)
@@ -57,6 +63,18 @@ export function UserProfile({ userId }: { userId: string }) {
 
   if (isLoading) return <div>Loading...</div>
   if (!profile) return <div>Profile not found</div>
+
+  if (showOnlyBio) {
+    return (
+      <div className="space-y-4">
+        {profile.bio ? (
+          <p className="text-muted-foreground">{profile.bio}</p>
+        ) : (
+          <p className="text-muted-foreground italic">No bio available</p>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

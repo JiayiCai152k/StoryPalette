@@ -52,9 +52,10 @@ export default async function ProfilePage({
           </TabsContent>
           
           <TabsContent value="about" className="mt-6">
-            <div className="prose dark:prose-invert max-w-none">
-              <h3 className="text-center">Links</h3>
-              {/* Social links will be rendered in UserProfile */}
+            <div className="max-w-2xl mx-auto text-center">
+              <Suspense fallback={<div>Loading about...</div>}>
+                <UserProfile userId={userId} showOnlyBio />
+              </Suspense>
             </div>
           </TabsContent>
         </Tabs>
