@@ -72,7 +72,7 @@ export default function NewCreations() {
   return (
     <section className="py-8">
       <h2 className="text-2xl font-bold text-center mb-6">Latest Creations</h2>
-      <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+      <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
         {artwork && (
           <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
             <div className="relative aspect-[4/3]">
@@ -146,6 +146,22 @@ export default function NewCreations() {
             </CardContent>
           </Card>
         )}
+
+        <Card className="hover:shadow-lg transition-shadow flex flex-col justify-center items-center">
+          <CardContent className="flex flex-col items-center justify-center h-full text-center p-6">
+            <h3 className="text-xl font-semibold mb-2">Want to see more?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Discover more latest creations in our explore page
+            </p>
+            <Link 
+              href="/explore" 
+              className="text-sm text-primary hover:underline flex items-center gap-2"
+            >
+              Check out more
+              <span aria-hidden="true">→</span>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </section>
   )
