@@ -21,6 +21,12 @@ type UserProfileData = {
   }
 }
 
+function truncateBio(bio: string, wordLimit: number = 30): string {
+  const words = bio.split(/\s+/)
+  if (words.length <= wordLimit) return bio
+  return words.slice(0, wordLimit).join(' ') + '...'
+}
+
 export function UserProfile({ 
   userId, 
   showOnlyBio = false 
@@ -90,7 +96,7 @@ export function UserProfile({
               <h1 className="text-2xl font-bold">{profile.name}</h1>
               <div className="mt-2 text-muted-foreground">
                 {profile.bio ? (
-                  <p>{profile.bio}</p>
+                  <p>{truncateBio(profile.bio)}</p>
                 ) : (
                   <p className="italic">No bio available</p>
                 )}
