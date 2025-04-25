@@ -9,7 +9,11 @@ import { PenSquare, ImageIcon, BookmarkIcon } from "lucide-react"
 import { headers } from "next/headers"
 import { CreationsTab } from "@/components/profile/CreationsTab"
 import { FictionsTab } from "@/components/profile/FictionsTab"
+import { BioDialog } from "@/components/profile/BioDialog"
 import Link from "next/link"
+import { db } from "@/db"
+import { users } from "@/db/schema/auth"
+import { eq } from "drizzle-orm"
 
 export default async function ProfilePage() {
   const session = await auth.api.getSession(({
@@ -20,6 +24,19 @@ export default async function ProfilePage() {
     return <p className="text-center mt-10 text-gray-500">Please log in to view your profile.</p>
   }
 
+  // Fetch user data including bio
+  const userData = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      image: users.image,
+      bio: users.bio,
+    })
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .then(rows => rows[0])
+
   return (
     <main className="container mx-auto py-8">
       <Card className="max-w-4xl mx-auto">
@@ -27,15 +44,22 @@ export default async function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex gap-4 items-center">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={session.user.image || ""} alt={session.user.name || "User"} />
-                <AvatarFallback>{session.user.name?.[0] || "U"}</AvatarFallback>
+                <AvatarImage src={userData.image || ""} alt={userData.name || "User"} />
+                <AvatarFallback>{userData.name?.[0] || "U"}</AvatarFallback>
               </Avatar>
-              <div>
-                <CardTitle className="text-2xl">{session.user.name}</CardTitle>
-                <p className="text-muted-foreground">{session.user.email}</p>
+              <div className="space-y-2">
+                <CardTitle className="text-2xl">{userData.name}</CardTitle>
+                <p className="text-muted-foreground">{userData.email}</p>
+                {userData.bio ? (
+                  <BioDialog bio={userData.bio} name={userData.name || "User"} />
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">No bio available</p>
+                )}
               </div>
             </div>
-            <Button variant="outline" className="w-full sm:w-auto">Edit Profile</Button>
+            <Button asChild variant="outline" className="w-full sm:w-auto">
+              <Link href="/profile/edit">Edit Profile</Link>
+            </Button>
           </div>
         </CardHeader>
         

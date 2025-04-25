@@ -11,9 +11,6 @@ type UserProfileData = {
   name: string
   image?: string | null
   bio?: string | null
-  website?: string | null
-  twitter?: string | null
-  instagram?: string | null
   _count: {
     posts: number
     followers: number
@@ -123,39 +120,6 @@ export function UserProfile({
               {" "}
               <span className="text-muted-foreground">following</span>
             </div>
-          </div>
-
-          <div className="flex justify-center sm:justify-start gap-4 mt-4">
-            {profile.website && (
-              <Link 
-                href={profile.website}
-                className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
-                target="_blank"
-              >
-                <Globe className="h-4 w-4" />
-                Website
-              </Link>
-            )}
-            {profile.twitter && (
-              <Link 
-                href={`https://twitter.com/${profile.twitter}`}
-                className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
-                target="_blank"
-              >
-                <Twitter className="h-4 w-4" />
-                Twitter
-              </Link>
-            )}
-            {profile.instagram && (
-              <Link 
-                href={`https://instagram.com/${profile.instagram}`}
-                className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
-                target="_blank"
-              >
-                <Instagram className="h-4 w-4" />
-                Instagram
-              </Link>
-            )}
           </div>
         </div>
       </div>
