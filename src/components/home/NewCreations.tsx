@@ -13,6 +13,11 @@ type Artwork = {
   title: string
   imageUrl: string
   caption?: string
+  user: {
+    id: string
+    name: string
+  }
+  createdAt: string
 }
 
 type Fiction = {
@@ -20,6 +25,11 @@ type Fiction = {
   title: string
   summary?: string
   wordCount: number
+  user: {
+    id: string
+    name: string
+  }
+  createdAt: string
 }
 
 export default function NewCreations() {
@@ -81,13 +91,25 @@ export default function NewCreations() {
                 </Link>
               </CardTitle>
             </CardHeader>
-            {artwork.caption && (
-              <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground line-clamp-2">
+            <CardContent>
+              {artwork.caption && (
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                   {artwork.caption}
                 </p>
-              </CardContent>
-            )}
+              )}
+              {artwork.user && (
+                <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
+                  <div className="flex items-center gap-2">
+                    <Link href={`/profile/${artwork.user.id}`} className="hover:underline">
+                      {artwork.user.name}
+                    </Link>
+                    <span>•</span>
+                    <time>{new Date(artwork.createdAt).toLocaleDateString()}</time>
+                  </div>
+                  <ImageIcon className="h-4 w-4" />
+                </div>
+              )}
+            </CardContent>
           </Card>
         )}
 
@@ -106,10 +128,21 @@ export default function NewCreations() {
                   {fiction.summary}
                 </p>
               )}
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
-                <BookOpen className="h-4 w-4" />
-              </div>
+              {fiction.user && (
+                <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto pt-4">
+                  <div className="flex items-center gap-2">
+                    <Link href={`/profile/${fiction.user.id}`} className="hover:underline">
+                      {fiction.user.name}
+                    </Link>
+                    <span>•</span>
+                    <time>{new Date(fiction.createdAt).toLocaleDateString()}</time>
+                  </div>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <span>{fiction.wordCount?.toLocaleString() ?? '0'} words</span>
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
