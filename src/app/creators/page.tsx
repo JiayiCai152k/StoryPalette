@@ -4,17 +4,19 @@ import { CreatorsSearch } from "@/components/creators/CreatorsSearch"
 
 export default function CreatorsPage() {
   return (
-    <div className="container py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Discover Creators</h1>
-      <div className="max-w-4xl mx-auto">
-        <Suspense>
-          <CreatorsSearch />
-        </Suspense>
-        <Suspense fallback={<CreatorsLoadingSkeleton />}>
-          <CreatorsList />
-        </Suspense>
+    <main className="container mx-auto py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <h1 className="text-3xl font-bold text-center mb-8">Discover Creators</h1>
+        <div className="space-y-6">
+          <Suspense>
+            <CreatorsSearch />
+          </Suspense>
+          <Suspense fallback={<CreatorsLoadingSkeleton />}>
+            <CreatorsList />
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
 
