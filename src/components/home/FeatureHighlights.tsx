@@ -27,7 +27,7 @@ export default function FeatureHighlights() {
 
   return (
     <section className="py-12">
-      <h2 className="text-3xl font-bold text-center mb-8">Platform Features</h2>
+      <h2 className="text-3xl font-bold text-center mb-6">Platform Features</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {features.map((feature, index) => (
           <Card key={index}>

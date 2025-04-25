@@ -61,7 +61,8 @@ export default function TrendingCreations() {
     return (
       <section className="py-12">
         <h2 className="text-3xl font-bold text-center mb-8">Trending Now</h2>
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
+          <Skeleton className="h-[300px]" />
           <Skeleton className="h-[300px]" />
           <Skeleton className="h-[300px]" />
         </div>
@@ -71,17 +72,17 @@ export default function TrendingCreations() {
 
   return (
     <section className="py-8">
-      <h2 className="text-2xl font-bold text-center mb-6">Trending Now</h2>
-      <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+      <h2 className="text-3xl font-bold text-center mb-6">Trending Now</h2>
+      <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto auto-rows-auto">
         {artwork && (
-          <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-            <div className="relative aspect-[4/3]">
+          <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 h-fit">
+            <div className="relative w-full h-32">
               <Image
                 src={artwork.imageUrl}
                 alt={artwork.title}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 768px) 100vw, 33vw"
               />
             </div>
             <CardHeader className="pb-1 px-4 pt-2">
@@ -91,7 +92,7 @@ export default function TrendingCreations() {
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col h-full px-4 pt-0">
+            <CardContent className="flex flex-col px-4 pt-0">
               {artwork.caption && (
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {artwork.caption}
@@ -114,7 +115,7 @@ export default function TrendingCreations() {
         )}
 
         {fiction && (
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg transition-shadow h-fit">
             <CardHeader className="pb-1 px-4 pt-2">
               <CardTitle className="line-clamp-4 text-base">
                 <Link href={`/profile/fictions/${fiction.id}`} className="hover:underline">
@@ -122,7 +123,7 @@ export default function TrendingCreations() {
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col h-full px-4 pt-0">
+            <CardContent className="flex flex-col px-4 pt-0">
               {fiction.summary && (
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {fiction.summary}
@@ -147,7 +148,7 @@ export default function TrendingCreations() {
           </Card>
         )}
 
-        <Card className="hover:shadow-lg transition-shadow flex flex-col justify-center items-center">
+        <Card className="hover:shadow-lg transition-shadow h-fit flex flex-col justify-center items-center">
           <CardContent className="flex flex-col items-center justify-center h-full text-center p-6">
             <h3 className="text-xl font-semibold mb-2">Want to see more?</h3>
             <p className="text-sm text-muted-foreground mb-4">
