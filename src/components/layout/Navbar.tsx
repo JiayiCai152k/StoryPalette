@@ -11,6 +11,7 @@ import {
   SheetTrigger,
   SheetDescription,
 } from "@/components/ui/sheet"
+import { SearchDialog } from "@/components/search/SearchDialog"
 
 export const Navbar = function Navbar() {
   return (
@@ -35,10 +36,9 @@ export const Navbar = function Navbar() {
         </div>
         
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="hidden md:flex">
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Search</span>
-          </Button>
+          <div className="hidden md:block">
+            <SearchDialog />
+          </div>
           
           <Button asChild variant="ghost" size="icon" className="hidden md:flex">
             <Link href="/create">
