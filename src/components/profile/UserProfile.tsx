@@ -3,9 +3,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
-import { Globe, Twitter, Instagram } from "lucide-react"
+import { Globe, Twitter, Instagram, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { BioDialog } from "./BioDialog"
+import { useCurrentUser } from "@/lib/hooks/useCurrentUser"
 
 type UserProfileData = {
   id: string
@@ -32,10 +33,14 @@ export function UserProfile({
   userId: string
   showOnlyBio?: boolean 
 }) {
+  const { user: currentUser } = useCurrentUser()
   const [profile, setProfile] = useState<UserProfileData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFollowing, setIsFollowing] = useState(false)
-
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isLoadingFollow, setIsLoadingFollow] = useState(true)
+  
+  // Get user profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -53,17 +58,69 @@ export function UserProfile({
     fetchProfile()
   }, [userId])
 
+  // Check if current user is following the profile user
+  useEffect(() => {
+    if (!currentUser) {
+      setIsLoadingFollow(false)
+      return
+    }
+    
+    const checkFollowStatus = async () => {
+      try {
+        const response = await fetch(`/api/users/${userId}/follow`)
+        if (response.ok) {
+          const data = await response.json()
+          setIsFollowing(data.isFollowing)
+        }
+      } catch (error) {
+        console.error('Error checking follow status:', error)
+      } finally {
+        setIsLoadingFollow(false)
+      }
+    }
+
+    checkFollowStatus()
+  }, [userId, currentUser])
+
   const handleFollow = async () => {
+    if (!currentUser) return
+    
+    setIsUpdating(true)
     try {
       const response = await fetch(`/api/users/${userId}/follow`, {
         method: isFollowing ? 'DELETE' : 'POST',
       })
-      if (!response.ok) throw new Error('Failed to update follow status')
-      setIsFollowing(!isFollowing)
+      
+      if (response.ok) {
+        setIsFollowing(!isFollowing)
+        
+        // Update follower count
+        if (profile) {
+          const countChange = isFollowing ? -1 : 1;
+          // Make sure we're working with numbers
+          const currentFollowers = Number(profile._count.followers);
+          const newFollowers = Math.max(0, currentFollowers + countChange);
+          
+          setProfile({
+            ...profile,
+            _count: {
+              ...profile._count,
+              followers: newFollowers
+            }
+          });
+        }
+      } else {
+        const data = await response.json()
+        console.error('Error updating follow status:', data.error)
+      }
     } catch (error) {
       console.error('Error updating follow status:', error)
+    } finally {
+      setIsUpdating(false)
     }
   }
+
+  const isOwnProfile = currentUser?.id === userId
 
   if (isLoading) return <div>Loading...</div>
   if (!profile) return <div>Profile not found</div>
@@ -106,24 +163,53 @@ export function UserProfile({
                 )}
               </div>
             </div>
-            <Button onClick={handleFollow} variant={isFollowing ? "secondary" : "default"}>
-              {isFollowing ? "Following" : "Follow"}
-            </Button>
+            
+            {!isOwnProfile && (
+              <Button 
+                onClick={handleFollow} 
+                variant={isFollowing ? "secondary" : "default"}
+                disabled={isLoadingFollow || isUpdating}
+              >
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : isLoadingFollow ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  isFollowing ? "Following" : "Follow"
+                )}
+              </Button>
+            )}
+            
+            {isOwnProfile && (
+              <Button asChild>
+                <Link href="/profile/edit">Edit Profile</Link>
+              </Button>
+            )}
           </div>
           
           <div className="flex justify-center sm:justify-start gap-6 mt-4">
             <div className="text-sm">
-              <span className="font-medium">{profile._count.posts}</span>
+              <span className="font-medium">{Number(profile._count.posts)}</span>
               {" "}
-              <span className="text-muted-foreground">creations</span>
+              <span className="text-muted-foreground">
+                {profile._count.posts === 1 ? "creation" : "creations"}
+              </span>
             </div>
             <div className="text-sm">
-              <span className="font-medium">{profile._count.followers}</span>
+              <span className="font-medium">{Number(profile._count.followers)}</span>
               {" "}
-              <span className="text-muted-foreground">followers</span>
+              <span className="text-muted-foreground">
+                {profile._count.followers === 1 ? "follower" : "followers"}
+              </span>
             </div>
             <div className="text-sm">
-              <span className="font-medium">{profile._count.following}</span>
+              <span className="font-medium">{Number(profile._count.following)}</span>
               {" "}
               <span className="text-muted-foreground">following</span>
             </div>
