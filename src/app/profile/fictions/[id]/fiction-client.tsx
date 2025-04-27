@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Heart, Share2, BookmarkPlus, MessageSquare } from "lucide-react"
+import { Heart, Share2, BookmarkPlus, MessageSquare, Check } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -15,6 +15,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 type FictionContent = {
   content: string;
@@ -163,10 +164,25 @@ export default function FictionClient({ id }: { id: string }) {
   const handleShare = async () => {
     try {
       const url = `${window.location.origin}/profile/fictions/${id}`
-      await navigator.clipboard.writeText(url)
-      alert("Link copied to clipboard")
+      
+      // Check if navigator and clipboard API are available
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(url)
+        toast.success("Link copied to clipboard", {
+          description: url,
+          duration: 3000,
+          icon: <Check className="h-4 w-4" />,
+        })
+      } else {
+        // Fallback for environments where clipboard API is not available
+        toast.info("Share link", {
+          description: url,
+          duration: 5000,
+        })
+      }
     } catch (error) {
       console.error("Error sharing:", error)
+      toast.error("Failed to copy link")
     }
   }
 
@@ -202,9 +218,18 @@ export default function FictionClient({ id }: { id: string }) {
               <div className="relative">
 
               </div>
-              <Button variant="ghost" size="icon" onClick={handleShare}>
-                <Share2 className="h-5 w-5" />
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" onClick={handleShare}>
+                      <Share2 className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Share story</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         </CardHeader>
