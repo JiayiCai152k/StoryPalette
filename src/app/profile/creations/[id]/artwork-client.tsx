@@ -4,7 +4,18 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Heart, Share2, BookmarkPlus } from "lucide-react"
+import { Heart, Share2, BookmarkPlus, MessageSquare } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { formatDistanceToNow } from "date-fns"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { useRouter } from "next/navigation"
 
 // Define the type for the artwork data
 type ArtworkPost = {
@@ -25,10 +36,38 @@ type ArtworkPost = {
   }>;
 }
 
+type Comment = {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    image?: string | null;
+  };
+}
+
+type Collection = {
+  id: string;
+  name: string;
+  saved?: boolean;
+}
+
 // Make sure to return JSX from the component
 export default function ArtworkClient({ id }: { id: string }) {
   const [artwork, setArtwork] = useState<ArtworkPost | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [newComment, setNewComment] = useState("")
+  const [isCommentLoading, setIsCommentLoading] = useState(false)
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [isCollectionOpen, setIsCollectionOpen] = useState(false)
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false)
+  const [newCollectionName, setNewCollectionName] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const fetchArtwork = async () => {
@@ -48,6 +87,172 @@ export default function ArtworkClient({ id }: { id: string }) {
 
     fetchArtwork()
   }, [id])
+
+  useEffect(() => {
+    // Fetch like status
+    const checkLikeStatus = async () => {
+      try {
+        const response = await fetch(`/api/posts/${id}/like`)
+        if (response.ok) {
+          const { liked, likeCount } = await response.json()
+          setLiked(liked)
+          setLikeCount(likeCount)
+        }
+      } catch (error) {
+        console.error('Error checking like status:', error)
+      }
+    }
+
+    // Fetch comments
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(`/api/posts/${id}/comments`)
+        if (response.ok) {
+          const data = await response.json()
+          setComments(data)
+        }
+      } catch (error) {
+        console.error('Error fetching comments:', error)
+      }
+    }
+
+    // Fetch collections
+    const fetchCollections = async () => {
+      try {
+        const response = await fetch(`/api/collections?postId=${id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setCollections(data)
+        }
+      } catch (error) {
+        console.error('Error fetching collections:', error)
+      }
+    }
+
+    if (id) {
+      checkLikeStatus()
+      fetchComments()
+      fetchCollections()
+    }
+  }, [id])
+
+  const handleLike = async () => {
+    try {
+      const response = await fetch(`/api/posts/${id}/like`, {
+        method: "POST"
+      })
+
+      if (response.ok) {
+        const { liked: newLikedStatus, likeCount } = await response.json()
+        setLiked(newLikedStatus)
+        setLikeCount(likeCount)
+      }
+    } catch (error) {
+      console.error('Error liking post:', error)
+    }
+  }
+
+  const handleToggleCollection = async () => {
+    if (collections.length === 0) {
+      console.error('No collection available');
+      return;
+    }
+    
+    // Get the single collection
+    const collection = collections[0];
+    
+    try {
+      const response = await fetch("/api/collections/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId: id, collectionId: collection.id }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const { saved } = data;
+        
+        // Update the saved status of the collection
+        setCollections([{ ...collection, saved }]);
+      }
+    } catch (error) {
+      console.error('Error saving to collection:', error);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return
+
+    setIsCommentLoading(true)
+    try {
+      const response = await fetch(`/api/posts/${id}/comments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: newComment }),
+      })
+
+      if (response.ok) {
+        const comment = await response.json()
+        setComments([comment, ...comments])
+        setNewComment("")
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error)
+    } finally {
+      setIsCommentLoading(false)
+    }
+  }
+
+  const handleShare = async () => {
+    try {
+      const url = `${window.location.origin}/profile/creations/${id}`
+      await navigator.clipboard.writeText(url)
+      alert("Link copied to clipboard")
+    } catch (error) {
+      console.error("Error sharing:", error)
+    }
+  }
+
+  const testClick = () => {
+    console.log('Test click detected!');
+  };
+
+  const handleCreateCollection = async () => {
+    if (!newCollectionName.trim()) return;
+    
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/collections", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          name: newCollectionName,
+          description: "",
+          isPrivate: false
+        }),
+      });
+      
+      if (response.ok) {
+        const newCollection = await response.json();
+        setCollections([...collections, { ...newCollection, saved: false }]);
+        setNewCollectionName("");
+        setIsCreatingCollection(false);
+        
+        // Automatically save to the new collection
+        handleToggleCollection();
+      }
+    } catch (error) {
+      console.error('Error creating collection:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>
   if (!artwork) return <div>Artwork not found</div>
@@ -75,13 +280,41 @@ export default function ArtworkClient({ id }: { id: string }) {
               </div>
             </div>
             <div className="flex space-x-2">
-              <Button variant="ghost" size="icon">
-                <Heart className="h-5 w-5" />
+              <Button 
+                variant="ghost" 
+                className={`flex items-center gap-1 ${liked ? "text-red-500" : ""}`}
+                onClick={handleLike}
+              >
+                <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
+                <span className="text-sm">{likeCount > 0 ? likeCount : ""}</span>
               </Button>
-              <Button variant="ghost" size="icon">
-                <BookmarkPlus className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon">
+              <div className="relative">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        className="flex items-center gap-1"
+                        onClick={handleToggleCollection}
+                      >
+                        <BookmarkPlus 
+                          className={`h-5 w-5 ${collections.length > 0 && collections[0].saved ? 
+                            "fill-current text-blue-500" : ""}`} 
+                        />
+                        <span className="sr-only">
+                          {collections.length > 0 && collections[0].saved ? 
+                            "Remove from collection" : "Add to collection"}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{collections.length > 0 && collections[0].saved ? 
+                        "Remove from collection" : "Add to collection"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleShare}>
                 <Share2 className="h-5 w-5" />
               </Button>
             </div>
@@ -116,6 +349,60 @@ export default function ArtworkClient({ id }: { id: string }) {
               ))}
             </div>
           )}
+          
+          <Tabs defaultValue="comments" className="mt-10">
+            <TabsList>
+              <TabsTrigger value="comments" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                <span>Comments ({comments.length})</span>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="comments" className="mt-4">
+              <div className="mb-6">
+                <Textarea
+                  placeholder="Add a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="min-h-[100px] mb-2"
+                />
+                <Button 
+                  onClick={handleAddComment} 
+                  disabled={isCommentLoading || !newComment.trim()}
+                  className="ml-auto block"
+                >
+                  {isCommentLoading ? "Posting..." : "Post Comment"}
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                {comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="flex gap-4 p-4 border rounded-lg">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={comment.user.image || ""} alt={comment.user.name} />
+                        <AvatarFallback>
+                          {comment.user.name?.[0] || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium">{comment.user.name}</h4>
+                          <span className="text-sm text-muted-foreground">
+                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm">{comment.content}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-6">
+                    No comments yet. Be the first to comment!
+                  </p>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </main>
