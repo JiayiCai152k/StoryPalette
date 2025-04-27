@@ -6,8 +6,8 @@ import { eq, and, count } from "drizzle-orm"
 import { headers } from "next/headers"
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   const session = await auth.api.getSession(({
     headers: await headers()
@@ -63,8 +63,8 @@ export async function POST(
 
 // GET to check like status
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   const session = await auth.api.getSession(({
     headers: await headers()

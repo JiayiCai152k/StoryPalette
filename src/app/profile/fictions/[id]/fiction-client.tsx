@@ -53,11 +53,6 @@ type Comment = {
   };
 }
 
-type Collection = {
-  id: string;
-  name: string;
-  saved?: boolean;
-}
 
 export default function FictionClient({ id }: { id: string }) {
   const [fiction, setFiction] = useState<FictionPost | null>(null)
@@ -67,8 +62,6 @@ export default function FictionClient({ id }: { id: string }) {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState("")
   const [isCommentLoading, setIsCommentLoading] = useState(false)
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [isCollectionOpen, setIsCollectionOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -118,23 +111,10 @@ export default function FictionClient({ id }: { id: string }) {
       }
     }
 
-    // Fetch collections
-    const fetchCollections = async () => {
-      try {
-        const response = await fetch(`/api/collections?postId=${id}`)
-        if (response.ok) {
-          const data = await response.json()
-          setCollections(data)
-        }
-      } catch (error) {
-        console.error('Error fetching collections:', error)
-      }
-    }
 
     if (id) {
       checkLikeStatus()
       fetchComments()
-      fetchCollections()
     }
   }, [id])
 
@@ -154,39 +134,6 @@ export default function FictionClient({ id }: { id: string }) {
     }
   }
 
-  const handleSaveToCollection = async (collectionId: string) => {
-    console.log('Saving to collection:', { postId: id, collectionId });
-    try {
-      const response = await fetch("/api/collections/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ postId: id, collectionId }),
-      });
-
-      console.log('Collection save response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Collection save response data:', data);
-        
-        const { saved } = data;
-        setCollections(collections.map(collection => 
-          collection.id === collectionId 
-            ? { ...collection, saved } 
-            : collection
-        ));
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error response from collection save API:', errorData);
-      }
-    } catch (error) {
-      console.error('Error saving to collection:', error);
-    } finally {
-      setIsCollectionOpen(false);
-    }
-  }
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return
@@ -253,62 +200,7 @@ export default function FictionClient({ id }: { id: string }) {
                 <span className="text-sm">{likeCount > 0 ? likeCount : ""}</span>
               </Button>
               <div className="relative">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        className="flex items-center gap-1"
-                        onClick={() => setIsCollectionOpen(!isCollectionOpen)}
-                      >
-                        <BookmarkPlus className={`h-5 w-5 ${collections.some(c => c.saved) ? "fill-current text-blue-500" : ""}`} />
-                        <span className="sr-only">Save to collection</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Save to collection</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                {isCollectionOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-background border rounded-md shadow-lg z-10">
-                    <div className="p-2 border-b">
-                      <h3 className="font-medium">Save to collection</h3>
-                    </div>
-                    <div className="max-h-[200px] overflow-y-auto">
-                      {collections.length > 0 ? (
-                        collections.map(collection => (
-                          <button
-                            key={collection.id}
-                            className="w-full text-left px-4 py-2 hover:bg-accent flex items-center justify-between"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              console.log('Collection button clicked:', collection.id);
-                              testClick();
-                              handleSaveToCollection(collection.id);
-                            }}
-                          >
-                            {collection.name}
-                            {collection.saved && <span className="text-green-500">✓</span>}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center">
-                          <p className="text-sm text-muted-foreground mb-2">You don't have any collections yet.</p>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full"
-                            onClick={() => router.push('/profile?tab=collections')}
-                          >
-                            Create a collection
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+
               </div>
               <Button variant="ghost" size="icon" onClick={handleShare}>
                 <Share2 className="h-5 w-5" />

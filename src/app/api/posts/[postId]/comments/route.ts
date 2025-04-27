@@ -7,8 +7,8 @@ import { eq } from "drizzle-orm"
 import { headers } from "next/headers"
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   const { postId } = await params
 
@@ -54,8 +54,8 @@ export async function GET(
 }
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { postId: string } }
+  request: Request,
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   const session = await auth.api.getSession(({
     headers: await headers()

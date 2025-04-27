@@ -47,12 +47,6 @@ type Comment = {
   };
 }
 
-type Collection = {
-  id: string;
-  name: string;
-  saved?: boolean;
-}
-
 // Make sure to return JSX from the component
 export default function ArtworkClient({ id }: { id: string }) {
   const [artwork, setArtwork] = useState<ArtworkPost | null>(null)
@@ -62,10 +56,6 @@ export default function ArtworkClient({ id }: { id: string }) {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState("")
   const [isCommentLoading, setIsCommentLoading] = useState(false)
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [isCollectionOpen, setIsCollectionOpen] = useState(false)
-  const [isCreatingCollection, setIsCreatingCollection] = useState(false)
-  const [newCollectionName, setNewCollectionName] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
@@ -116,23 +106,10 @@ export default function ArtworkClient({ id }: { id: string }) {
       }
     }
 
-    // Fetch collections
-    const fetchCollections = async () => {
-      try {
-        const response = await fetch(`/api/collections?postId=${id}`)
-        if (response.ok) {
-          const data = await response.json()
-          setCollections(data)
-        }
-      } catch (error) {
-        console.error('Error fetching collections:', error)
-      }
-    }
 
     if (id) {
       checkLikeStatus()
       fetchComments()
-      fetchCollections()
     }
   }, [id])
 
@@ -152,35 +129,6 @@ export default function ArtworkClient({ id }: { id: string }) {
     }
   }
 
-  const handleToggleCollection = async () => {
-    if (collections.length === 0) {
-      console.error('No collection available');
-      return;
-    }
-    
-    // Get the single collection
-    const collection = collections[0];
-    
-    try {
-      const response = await fetch("/api/collections/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ postId: id, collectionId: collection.id }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const { saved } = data;
-        
-        // Update the saved status of the collection
-        setCollections([{ ...collection, saved }]);
-      }
-    } catch (error) {
-      console.error('Error saving to collection:', error);
-    }
-  };
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return
@@ -221,38 +169,6 @@ export default function ArtworkClient({ id }: { id: string }) {
     console.log('Test click detected!');
   };
 
-  const handleCreateCollection = async () => {
-    if (!newCollectionName.trim()) return;
-    
-    setIsSubmitting(true);
-    try {
-      const response = await fetch("/api/collections", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          name: newCollectionName,
-          description: "",
-          isPrivate: false
-        }),
-      });
-      
-      if (response.ok) {
-        const newCollection = await response.json();
-        setCollections([...collections, { ...newCollection, saved: false }]);
-        setNewCollectionName("");
-        setIsCreatingCollection(false);
-        
-        // Automatically save to the new collection
-        handleToggleCollection();
-      }
-    } catch (error) {
-      console.error('Error creating collection:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (isLoading) return <div>Loading...</div>
   if (!artwork) return <div>Artwork not found</div>
@@ -288,32 +204,6 @@ export default function ArtworkClient({ id }: { id: string }) {
                 <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
                 <span className="text-sm">{likeCount > 0 ? likeCount : ""}</span>
               </Button>
-              <div className="relative">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        className="flex items-center gap-1"
-                        onClick={handleToggleCollection}
-                      >
-                        <BookmarkPlus 
-                          className={`h-5 w-5 ${collections.length > 0 && collections[0].saved ? 
-                            "fill-current text-blue-500" : ""}`} 
-                        />
-                        <span className="sr-only">
-                          {collections.length > 0 && collections[0].saved ? 
-                            "Remove from collection" : "Add to collection"}
-                        </span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{collections.length > 0 && collections[0].saved ? 
-                        "Remove from collection" : "Add to collection"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
               <Button variant="ghost" size="icon" onClick={handleShare}>
                 <Share2 className="h-5 w-5" />
               </Button>
