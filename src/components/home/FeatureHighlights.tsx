@@ -4,24 +4,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function FeatureHighlights() {
   const features = [
     {
-      title: "Rich Content Creation",
-      description: "Share artwork or write stories",
-      details: "Upload images in various formats or write stories with our rich-text editor"
+      "title": "Rich Content Creation",
+      "description": "Share artwork or write stories",
+      "details": "Share the sparks of your imagination—whether it’s a vivid illustration, a heartfelt poem, or a scene from your favorite story—and inspire others with your creative vision."
     },
     {
-      title: "Discover & Connect",
-      description: "Find inspiration and fellow creators",
-      details: "Browse by tags, categories, or follow your favorite creators"
+      "title": "Discover & Explore",
+      "description": "Find new inspiration",
+      "details": "Browse creations by tags to uncover works that spark your creativity."
     },
     {
-      title: "Weekly Challenges",
-      description: "Push your creative boundaries",
-      details: "Participate in community prompts and themed challenges"
+      "title": "Connect & Engage",
+      "description": "Interact with fellow creators",
+      "details": "Like and save your favorite works, leave thoughtful comments, and build connections with artists and writers you admire."
     },
     {
-      title: "Portfolio Building",
-      description: "Showcase your best work",
-      details: "Create a beautiful portfolio to highlight your creations"
+      "title": "Portfolio Building",
+      "description": "Showcase your best work",
+      "details": "Create a beautiful portfolio page to highlight your favorite images and stories."
     }
   ];
 

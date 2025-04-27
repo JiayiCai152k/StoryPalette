@@ -19,7 +19,7 @@ export default function Home() {
             <Link href="/explore">Explore Creations</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link href="/sign-up">Join Community</Link>
+            <Link href="/creators">Explore Creators</Link>
           </Button>
         </div>
       </section>
@@ -62,18 +62,19 @@ export default function Home() {
           
           <Card>
             <CardHeader>
-              <CardTitle>Weekly Challenges</CardTitle>
-              <CardDescription>Find inspiration through prompts</CardDescription>
+              <CardTitle>Discover Creations</CardTitle>
+              <CardDescription>Explore community artworks and fiction</CardDescription>
             </CardHeader>
             <CardContent>
-              <p>Participate in weekly art or writing challenges to push your creative boundaries.</p>
+              <p>Discover a world of creations—from stunning visual artworks to captivating fictions.</p>
             </CardContent>
             <CardFooter>
               <Button asChild variant="outline">
-                <Link href="/challenges">View Challenges</Link>
+                <Link href="/explore">Discover Creations</Link>
               </Button>
             </CardFooter>
           </Card>
+
         </div>
       </section>
       

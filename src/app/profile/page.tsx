@@ -14,7 +14,6 @@ import Link from "next/link"
 import { db } from "@/db"
 import { users } from "@/db/schema/auth"
 import { eq } from "drizzle-orm"
-import { CollectionsTab } from "@/components/profile/CollectionsTab"
 
 export default async function ProfilePage() {
   const session = await auth.api.getSession(({
@@ -74,8 +73,8 @@ export default async function ProfilePage() {
               </TabsTrigger>
               <TabsTrigger value="creations" className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Creations</span>
-                <span className="sr-only sm:hidden">Creations</span>
+                <span className="hidden sm:inline">Artworks</span>
+                <span className="sr-only sm:hidden">Artworks</span>
               </TabsTrigger>
               <TabsTrigger value="collections" className="flex items-center gap-2">
                 <BookmarkIcon className="h-4 w-4" />
@@ -93,7 +92,9 @@ export default async function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="collections" className="mt-6">
-              <CollectionsTab />
+              <div className="grid gap-4">
+                <p className="text-muted-foreground">No collections yet</p>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
