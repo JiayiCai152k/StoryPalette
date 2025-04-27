@@ -5,16 +5,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PenSquare, ImageIcon, BookmarkIcon } from "lucide-react"
+import { PenSquare, ImageIcon, BookmarkIcon, UserIcon, UsersIcon } from "lucide-react"
 import { headers } from "next/headers"
 import { CreationsTab } from "@/components/profile/CreationsTab"
 import { FictionsTab } from "@/components/profile/FictionsTab"
 import { BioDialog } from "@/components/profile/BioDialog"
 import Link from "next/link"
 import { db } from "@/db"
-import { users } from "@/db/schema/auth"
-import { eq } from "drizzle-orm"
+import { users, userFollows } from "@/db/schema/auth"
+import { eq, sql } from "drizzle-orm"
 import { CollectionsTab } from "@/components/profile/CollectionsTab"
+import { FollowersClient } from "@/components/profile/FollowersClient"
+
 export default async function ProfilePage() {
   const session = await auth.api.getSession(({
     headers: await headers()
@@ -32,9 +34,18 @@ export default async function ProfilePage() {
       email: users.email,
       image: users.image,
       bio: users.bio,
+      _count: {
+        followers: sql<number>`count(distinct case when ${userFollows.followingId} = ${session.user.id} then ${userFollows.followerId} end)`,
+        following: sql<number>`count(distinct case when ${userFollows.followerId} = ${session.user.id} then ${userFollows.followingId} end)`
+      }
     })
     .from(users)
+    .leftJoin(
+      userFollows,
+      eq(users.id, session.user.id)
+    )
     .where(eq(users.id, session.user.id))
+    .groupBy(users.id)
     .then(rows => rows[0])
 
   return (
@@ -55,6 +66,14 @@ export default async function ProfilePage() {
                 ) : (
                   <p className="text-sm text-muted-foreground italic">No bio available</p>
                 )}
+                
+                <div className="flex gap-4 mt-2">
+                  <FollowersClient 
+                    userId={userData.id}
+                    followerCount={userData._count.followers}
+                    followingCount={userData._count.following}
+                  />
+                </div>
               </div>
             </div>
             <Button asChild variant="outline" className="w-full sm:w-auto">

@@ -7,6 +7,7 @@ import { Globe, Twitter, Instagram, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { BioDialog } from "./BioDialog"
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser"
+import { FollowersDialog } from "./FollowersDialog"
 
 type UserProfileData = {
   id: string
@@ -39,6 +40,8 @@ export function UserProfile({
   const [isFollowing, setIsFollowing] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isLoadingFollow, setIsLoadingFollow] = useState(true)
+  const [followerDialogOpen, setFollowerDialogOpen] = useState(false)
+  const [followingDialogOpen, setFollowingDialogOpen] = useState(false)
   
   // Get user profile
   useEffect(() => {
@@ -202,20 +205,48 @@ export function UserProfile({
               </span>
             </div>
             <div className="text-sm">
-              <span className="font-medium">{Number(profile._count.followers)}</span>
-              {" "}
-              <span className="text-muted-foreground">
-                {profile._count.followers === 1 ? "follower" : "followers"}
-              </span>
+              <button 
+                onClick={() => setFollowerDialogOpen(true)}
+                className="hover:underline focus:outline-none focus:underline"
+              >
+                <span className="font-medium">{Number(profile._count.followers)}</span>
+                {" "}
+                <span className="text-muted-foreground">
+                  {profile._count.followers === 1 ? "follower" : "followers"}
+                </span>
+              </button>
             </div>
             <div className="text-sm">
-              <span className="font-medium">{Number(profile._count.following)}</span>
-              {" "}
-              <span className="text-muted-foreground">following</span>
+              <button 
+                onClick={() => setFollowingDialogOpen(true)}
+                className="hover:underline focus:outline-none focus:underline"
+              >
+                <span className="font-medium">{Number(profile._count.following)}</span>
+                {" "}
+                <span className="text-muted-foreground">following</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Followers Dialog */}
+      <FollowersDialog
+        userId={userId}
+        type="followers"
+        count={Number(profile._count.followers)}
+        open={followerDialogOpen}
+        onOpenChange={setFollowerDialogOpen}
+      />
+
+      {/* Following Dialog */}
+      <FollowersDialog
+        userId={userId}
+        type="following"
+        count={Number(profile._count.following)}
+        open={followingDialogOpen}
+        onOpenChange={setFollowingDialogOpen}
+      />
     </div>
   )
 } 
