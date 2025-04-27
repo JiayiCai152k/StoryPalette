@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { likes, posts } from "@/db/schema/content";
+import { likes, posts, postTags, tags } from "@/db/schema/content";
+import { users } from "@/db/schema/auth";
 import { eq, desc } from "drizzle-orm";
 import { headers } from "next/headers";
 
@@ -32,7 +33,7 @@ type LikedPost = {
   };
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const session = await auth.api.getSession({
     headers: await headers()
   });
@@ -43,47 +44,35 @@ export async function GET(request: NextRequest) {
   
   try {
     // Get all posts liked by the current user with their details
-    const likedPosts = await db.query.likes.findMany({
-      where: eq(likes.userId, session.user.id),
-      with: {
-        post: {
-          with: {
-            user: {
-              columns: {
-                id: true,
-                name: true,
-                image: true,
-              },
-            },
-            postTags: {
-              with: {
-                tag: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: [desc(likes.createdAt)],
-    }) as unknown as LikedPost[];
+    const likedPosts = await db
+      .select({
+        id: posts.id,
+        userId: posts.userId,
+        type: posts.type,
+        title: posts.title,
+        description: posts.description,
+        createdAt: posts.createdAt,
+        imageUrl: posts.imageUrl,
+        caption: posts.caption,
+        content: posts.content,
+        summary: posts.summary,
+        wordCount: posts.wordCount,
+        user: {
+          id: users.id,
+          name: users.name,
+          image: users.image,
+        }
+      })
+      .from(likes)
+      .innerJoin(posts, eq(likes.postId, posts.id))
+      .innerJoin(users, eq(posts.userId, users.id))
+      .where(eq(likes.userId, session.user.id))
+      .orderBy(desc(likes.createdAt));
 
-    // Map the query result to our desired output format
-    const result = likedPosts.map(like => ({
-      id: like.post.id,
-      userId: like.post.userId,
-      type: like.post.type,
-      title: like.post.title,
-      description: like.post.description,
-      createdAt: like.post.createdAt,
-      imageUrl: like.post.imageUrl,
-      caption: like.post.caption,
-      content: like.post.content,
-      summary: like.post.summary,
-      wordCount: like.post.wordCount,
-      user: like.post.user,
-      tags: like.post.postTags.map(pt => pt.tag)
-    }));
+    // For debugging
+    console.log('Fetched liked posts:', JSON.stringify(likedPosts, null, 2));
 
-    return NextResponse.json(result);
+    return NextResponse.json(likedPosts);
   } catch (error) {
     console.error("Error fetching liked posts:", error);
     return NextResponse.json(
