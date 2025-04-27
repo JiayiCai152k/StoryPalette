@@ -17,7 +17,7 @@ type FictionPost = {
   id: string;
   title: string;
   summary?: string;
-  content: string; // This is now the actual content, not the URL
+  content: string;
   wordCount: number | null;
   user: {
     id: string;

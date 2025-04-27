@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { UserProfile } from "@/components/profile/UserProfile"
 import { UserCreations } from "@/components/profile/UserCreations"
+import { UserFictions } from "@/components/profile/UserFictions"
 import { notFound } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -42,12 +43,19 @@ export default async function ProfilePage({
         <Tabs defaultValue="creations" className="w-full">
           <TabsList className="flex justify-center w-full">
             <TabsTrigger value="creations">Creations</TabsTrigger>
+            <TabsTrigger value="fictions">Fictions</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
           
           <TabsContent value="creations" className="mt-6">
             <Suspense fallback={<div>Loading creations...</div>}>
               <UserCreations userId={userId} />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="fictions" className="mt-6">
+            <Suspense fallback={<div>Loading fictions...</div>}>
+              <UserFictions userId={userId} />
             </Suspense>
           </TabsContent>
           

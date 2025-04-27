@@ -43,6 +43,7 @@ export function FictionsTab() {
   }, [])
 
   const handleFictionClick = (id: string) => {
+    console.log('Fiction clicked:', id)
     router.push(`/profile/fictions/${id}`)
   }
 

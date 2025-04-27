@@ -88,14 +88,16 @@ export default function ArtworkClient({ id }: { id: string }) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="relative aspect-square w-full max-w-3xl mx-auto mb-6">
-            <Image
-              src={artwork.imageUrl}
-              alt={artwork.title}
-              fill
-              className="object-contain"
-            />
-          </div>
+          {artwork.imageUrl && (
+            <div className="relative aspect-square w-full max-w-3xl mx-auto mb-6">
+              <Image
+                src={artwork.imageUrl}
+                alt={artwork.title}
+                fill
+                className="object-contain"
+              />
+            </div>
+          )}
           {artwork.caption && (
             <p className="text-lg text-center mb-4">{artwork.caption}</p>
           )}

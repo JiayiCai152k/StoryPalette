@@ -8,7 +8,7 @@ export default async function FictionPage({
 }: { 
   params: Promise<{ id: string }> 
 }) {
-  const { id } = await params;
+  const { id } = await params
   const session = await auth.api.getSession(({
     headers: await headers()
   }))
