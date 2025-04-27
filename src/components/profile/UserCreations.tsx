@@ -55,7 +55,7 @@ function CreationCard({ creation }: { creation: Creation }) {
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
       <Link href={`/profile/creations/${creation.id}`}>
         {creation.imageUrl && (
-          <div className="relative w-full h-32">
+          <div className="relative w-full h-32 mb-4">
             <Image
               src={creation.imageUrl}
               alt={creation.title}
