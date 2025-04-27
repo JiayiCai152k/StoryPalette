@@ -14,7 +14,7 @@ import Link from "next/link"
 import { db } from "@/db"
 import { users } from "@/db/schema/auth"
 import { eq } from "drizzle-orm"
-
+import { CollectionsTab } from "@/components/profile/CollectionsTab"
 export default async function ProfilePage() {
   const session = await auth.api.getSession(({
     headers: await headers()
@@ -92,9 +92,7 @@ export default async function ProfilePage() {
             </TabsContent>
             
             <TabsContent value="collections" className="mt-6">
-              <div className="grid gap-4">
-                <p className="text-muted-foreground">No collections yet</p>
-              </div>
+              <CollectionsTab />
             </TabsContent>
           </Tabs>
         </CardContent>
