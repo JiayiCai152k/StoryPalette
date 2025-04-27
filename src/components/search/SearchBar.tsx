@@ -30,6 +30,7 @@ export function SearchBar({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
+  const [isSelectingTag, setIsSelectingTag] = useState(false)
   const debouncedQuery = useDebounce(query, 300)
 
   const handleSearchTypeChange = (type: SearchType) => {
@@ -84,10 +85,21 @@ export function SearchBar({
   }
 
   const handleTagSelect = (tag: Tag) => {
+    setIsSelectingTag(true)
     setQuery(tag.name)
     setSearchType('tag')
     setShowSuggestions(false)
-    router.push(`/search?q=${encodeURIComponent(tag.name)}&type=tag`)
+    setIsTyping(false)
+    
+    const searchParams = new URLSearchParams({
+      q: tag.name,
+      type: 'tag'
+    })
+    router.push(`/search?${searchParams.toString()}`)
+    
+    setTimeout(() => {
+      setIsSelectingTag(false)
+    }, 100)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +113,7 @@ export function SearchBar({
   }
 
   const handleBlur = (e: React.FocusEvent) => {
+    if (isSelectingTag) return
     setTimeout(() => {
       setShowSuggestions(false)
       setIsTyping(false)
@@ -192,7 +205,11 @@ export function SearchBar({
                   key={tag.id}
                   className="w-full text-left px-3 py-2 hover:bg-accent flex items-center justify-between"
                   onClick={() => handleTagSelect(tag)}
-                  onMouseDown={(e) => e.preventDefault()}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    setIsSelectingTag(true)
+                  }}
+                  onMouseUp={() => setIsSelectingTag(false)}
                 >
                   <span className="flex items-center">
                     <span className="mr-2 text-muted-foreground">#</span>
