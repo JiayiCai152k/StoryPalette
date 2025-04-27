@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload } from "@/components/upload/ImageUpload"
 import { TagInput } from "@/components/ui/tag-input"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { uploadImage } from "@/lib/utils/uploadImage"
+import { useDebounce } from "@/lib/hooks/useDebounce"
 
 // Popular art tags for suggestions
 const popularTags = [
@@ -19,6 +20,12 @@ const popularTags = [
   "fanart", "conceptart", "characterdesign", "photography"
 ]
 
+type Tag = {
+  id: string
+  name: string
+  postCount: number
+}
+
 export default function CreateArtworkPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -26,6 +33,10 @@ export default function CreateArtworkPage() {
   const [tags, setTags] = useState<string[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [tagInput, setTagInput] = useState("")
+  const [tagSuggestions, setTagSuggestions] = useState<Tag[]>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+  const debouncedTagInput = useDebounce(tagInput, 300)
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -73,6 +84,42 @@ export default function CreateArtworkPage() {
       setUploadProgress(0)
       setIsSubmitting(false)
     }
+  }
+
+  useEffect(() => {
+    if (!debouncedTagInput) {
+      setTagSuggestions([])
+      return
+    }
+
+    const fetchSuggestions = async () => {
+      setIsLoadingSuggestions(true)
+      try {
+        const response = await fetch(
+          `/api/tags/suggestions?q=${encodeURIComponent(debouncedTagInput)}`
+        )
+        if (response.ok) {
+          const data = await response.json()
+          setTagSuggestions(data)
+        }
+      } catch (error) {
+        console.error('Error fetching tag suggestions:', error)
+      } finally {
+        setIsLoadingSuggestions(false)
+      }
+    }
+
+    fetchSuggestions()
+  }, [debouncedTagInput])
+
+  const handleTagInputChange = (value: string) => {
+    setTagInput(value)
+  }
+
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags)
+    setTagInput("")
+    setIsLoadingSuggestions(false)
   }
 
   return (
@@ -148,10 +195,13 @@ export default function CreateArtworkPage() {
                 </label>
                 <TagInput
                   value={tags}
-                  onChange={setTags}
+                  onChange={handleTagsChange}
                   suggestions={popularTags}
                   placeholder="Add tags (e.g. digital, fantasy)"
                   maxTags={10}
+                  onInputChange={handleTagInputChange}
+                  dynamicSuggestions={tagSuggestions}
+                  isLoading={isLoadingSuggestions}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Press enter to add a tag, or click a suggestion

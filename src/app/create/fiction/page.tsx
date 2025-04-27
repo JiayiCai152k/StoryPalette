@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { TagInput } from "@/components/ui/tag-input"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { uploadFiction } from "@/lib/utils/uploadFiction"
+import { useDebounce } from "@/lib/hooks/useDebounce"
 
 // Popular fiction tags for suggestions
 const popularTags = [
@@ -17,11 +18,57 @@ const popularTags = [
   "historical", "literary", "fanfiction", "comedy"
 ]
 
+type Tag = {
+  id: string
+  name: string
+  postCount: number
+}
+
 export default function CreateFictionPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [tagInput, setTagInput] = useState("")
+  const [tagSuggestions, setTagSuggestions] = useState<Tag[]>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+  const debouncedTagInput = useDebounce(tagInput, 300)
+
+  useEffect(() => {
+    if (!debouncedTagInput) {
+      setTagSuggestions([])
+      return
+    }
+
+    const fetchSuggestions = async () => {
+      setIsLoadingSuggestions(true)
+      try {
+        const response = await fetch(
+          `/api/tags/suggestions?q=${encodeURIComponent(debouncedTagInput)}`
+        )
+        if (response.ok) {
+          const data = await response.json()
+          setTagSuggestions(data)
+        }
+      } catch (error) {
+        console.error('Error fetching tag suggestions:', error)
+      } finally {
+        setIsLoadingSuggestions(false)
+      }
+    }
+
+    fetchSuggestions()
+  }, [debouncedTagInput])
+
+  const handleTagInputChange = (value: string) => {
+    setTagInput(value)
+  }
+
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags)
+    setTagInput("")
+    setIsLoadingSuggestions(false)
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -140,10 +187,13 @@ export default function CreateFictionPage() {
               </label>
               <TagInput
                 value={tags}
-                onChange={setTags}
+                onChange={handleTagsChange}
                 suggestions={popularTags}
                 placeholder="Add tags (e.g. fantasy, shortstory)"
                 maxTags={10}
+                onInputChange={handleTagInputChange}
+                dynamicSuggestions={tagSuggestions}
+                isLoading={isLoadingSuggestions}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Press enter to add a tag, or click a suggestion
