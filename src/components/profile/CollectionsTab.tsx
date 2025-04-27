@@ -7,6 +7,23 @@ import { Heart } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 
+// Add a helper function to truncate summaries
+function truncateSummary(summary: string, maxLength: number = 120): string {
+  if (summary.length <= maxLength) return summary
+  
+  // Try to cut at a word boundary
+  const truncated = summary.substring(0, maxLength)
+  const lastSpaceIndex = truncated.lastIndexOf(' ')
+  
+  if (lastSpaceIndex > maxLength * 0.8) {
+    // If we can find a space in the last 20% of the text, cut there
+    return truncated.substring(0, lastSpaceIndex) + '...'
+  }
+  
+  // Otherwise just cut at maxLength
+  return truncated + '...'
+}
+
 type Post = {
   id: string;
   userId: string;
@@ -123,7 +140,7 @@ export function CollectionsTab() {
                 >
                   <CardHeader className="space-y-2">
                     <div>
-                      <CardTitle className="line-clamp-2">{item.title}</CardTitle>
+                      <CardTitle className="line-clamp-1 text-ellipsis overflow-hidden">{item.title}</CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">
                         by {item.user?.name || 'Anonymous'}
                       </p>
@@ -132,7 +149,7 @@ export function CollectionsTab() {
                   <CardContent className="flex flex-col flex-1">
                     {item.summary && (
                       <p className="text-sm text-muted-foreground mb-4 italic">
-                        {item.summary}
+                        {truncateSummary(item.summary)}
                       </p>
                     )}
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -165,7 +182,7 @@ export function CollectionsTab() {
                 >
                   <CardHeader className="pb-2 space-y-2">
                     <div>
-                      <CardTitle className="line-clamp-2">{item.title}</CardTitle>
+                      <CardTitle className="line-clamp-1 text-ellipsis overflow-hidden">{item.title}</CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">
                         by {item.user?.name || 'Anonymous'}
                       </p>
@@ -201,9 +218,9 @@ export function CollectionsTab() {
                 >
                   <CardHeader className="pb-2 space-y-2">
                     <div>
-                      <CardTitle className="line-clamp-2 flex items-center gap-2">
-                        {item.title}
-                        <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full">
+                      <CardTitle className="line-clamp-1 text-ellipsis overflow-hidden flex items-center gap-2">
+                        <span className="truncate">{item.title}</span>
+                        <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full flex-shrink-0">
                           {item.type === 'ARTWORK' ? 'Artwork' : 'Fiction'}
                         </span>
                       </CardTitle>
@@ -225,7 +242,7 @@ export function CollectionsTab() {
                     )}
                     {item.summary && (
                       <p className="text-sm text-muted-foreground mb-4 italic">
-                        {item.summary}
+                        {truncateSummary(item.summary)}
                       </p>
                     )}
                     <div className="flex flex-wrap gap-2 mb-4">
