@@ -40,6 +40,8 @@ export const insertTodoSchema = createInsertSchema(todos, {
 })
 export type NewTodo = z.infer<typeof insertTodoSchema>;
 
-export default {
+const todosSchema = {
   todos
-};
+}
+
+export default todosSchema

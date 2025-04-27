@@ -1,3 +1,5 @@
+"use client"
+
 // src/components/layout/Navbar.tsx
 import { UserButton } from "@daveyplate/better-auth-ui"
 import Link from "next/link";
@@ -11,9 +13,11 @@ import {
   SheetTrigger,
   SheetDescription,
 } from "@/components/ui/sheet"
-import { SearchDialog } from "@/components/search/SearchDialog"
+import { useRouter } from "next/navigation"
 
 export const Navbar = function Navbar() {
+  const router = useRouter()
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/60 backdrop-blur">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -36,9 +40,15 @@ export const Navbar = function Navbar() {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="hidden md:block">
-            <SearchDialog />
-          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="hidden md:flex"
+            onClick={() => router.push('/search')}
+          >
+            <Search className="h-5 w-5" />
+            <span className="sr-only">Search</span>
+          </Button>
           
           <Button asChild variant="ghost" size="icon" className="hidden md:flex">
             <Link href="/create">
