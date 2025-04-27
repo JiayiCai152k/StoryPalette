@@ -63,23 +63,17 @@ export function CollectionsTab() {
         }
         const data = await response.json()
         
-        // For debugging
-        console.log('Received data:', data);
-        
-        setLikedItems(data.map((post: Post) => {
-          console.log('Processing post:', post); // Debug individual post
-          return {
-            id: post.id,
-            title: post.title,
-            type: post.type,
-            summary: post.summary || undefined,
-            imageUrl: post.imageUrl || undefined,
-            wordCount: post.wordCount,
-            createdAt: new Date(post.createdAt),
-            tags: post.tags || [],
-            user: post.user
-          };
-        }))
+        setLikedItems(data.map((post: Post) => ({
+          id: post.id,
+          title: post.title,
+          type: post.type,
+          summary: post.summary || undefined,
+          imageUrl: post.imageUrl || undefined,
+          wordCount: post.wordCount,
+          createdAt: new Date(post.createdAt),
+          tags: post.tags || [],
+          user: post.user
+        })))
       } catch (error) {
         console.error('Error fetching liked items:', error)
       } finally {
@@ -119,55 +113,6 @@ export function CollectionsTab() {
         </TabsList>
 
         <div className="w-full">
-          <TabsContent value="all">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {likedItems.map((item) => (
-                <Card 
-                  key={item.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow flex flex-col"
-                  onClick={() => handleItemClick(item)}
-                >
-                  <CardHeader className="pb-2 space-y-2">
-                    <div>
-                      <CardTitle className="line-clamp-2 flex items-center gap-2">
-                        {item.title}
-                        <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full">
-                          {item.type === 'ARTWORK' ? 'Artwork' : 'Fiction'}
-                        </span>
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        by {item.user?.name || 'Anonymous'}
-                      </p>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex flex-col flex-1">
-                    {item.type === 'ARTWORK' && item.imageUrl && (
-                      <div className="relative h-40 mb-3">
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.title}
-                          fill
-                          className="object-cover rounded-md"
-                        />
-                      </div>
-                    )}
-                    {item.summary && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">
-                        {item.summary}
-                      </p>
-                    )}
-                    <div className="flex justify-between text-sm text-muted-foreground mt-auto pt-4">
-                      {item.type === 'FICTION' && (
-                        <span>{item.wordCount?.toLocaleString() || '0'} words</span>
-                      )}
-                      <span className="ml-auto">{item.createdAt.toLocaleDateString()}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
           <TabsContent value="fictions">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {fictionItems.map((item) => (
@@ -186,11 +131,21 @@ export function CollectionsTab() {
                   </CardHeader>
                   <CardContent className="flex flex-col flex-1">
                     {item.summary && (
-                      <p className="text-sm text-muted-foreground line-clamp-3">
+                      <p className="text-sm text-muted-foreground mb-4 italic">
                         {item.summary}
                       </p>
                     )}
-                    <div className="flex justify-between text-sm text-muted-foreground mt-auto pt-4">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {item.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full"
+                        >
+                          #{tag.name}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground mt-auto pt-4 border-t">
                       <span>{item.wordCount?.toLocaleString() || '0'} words</span>
                       <span>{item.createdAt.toLocaleDateString()}</span>
                     </div>
@@ -229,6 +184,65 @@ export function CollectionsTab() {
                     )}
                     <div className="text-sm text-muted-foreground mt-auto">
                       <span>{item.createdAt.toLocaleDateString()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="all">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {likedItems.map((item) => (
+                <Card 
+                  key={item.id}
+                  className="cursor-pointer hover:shadow-lg transition-shadow flex flex-col"
+                  onClick={() => handleItemClick(item)}
+                >
+                  <CardHeader className="pb-2 space-y-2">
+                    <div>
+                      <CardTitle className="line-clamp-2 flex items-center gap-2">
+                        {item.title}
+                        <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full">
+                          {item.type === 'ARTWORK' ? 'Artwork' : 'Fiction'}
+                        </span>
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        by {item.user?.name || 'Anonymous'}
+                      </p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-col flex-1">
+                    {item.type === 'ARTWORK' && item.imageUrl && (
+                      <div className="relative h-40 mb-3">
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.title}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                    )}
+                    {item.summary && (
+                      <p className="text-sm text-muted-foreground mb-4 italic">
+                        {item.summary}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {item.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full"
+                        >
+                          #{tag.name}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground mt-auto pt-4 border-t">
+                      {item.type === 'FICTION' && (
+                        <span>{item.wordCount?.toLocaleString() || '0'} words</span>
+                      )}
+                      <span className="ml-auto">{item.createdAt.toLocaleDateString()}</span>
                     </div>
                   </CardContent>
                 </Card>
