@@ -65,7 +65,9 @@ export default function CreateFictionPage() {
   }
 
   const handleTagsChange = (newTags: string[]) => {
-    setTags(newTags)
+    // Clean up each tag: remove leading # and trim whitespace
+    const cleanedTags = newTags.map(tag => tag.replace(/^#/, '').trim()).filter(Boolean)
+    setTags(cleanedTags)
     setTagInput("")
     setIsLoadingSuggestions(false)
   }
