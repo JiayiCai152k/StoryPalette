@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { LoadingPage } from "@/components/ui/loading"
 
 // Define the type for the artwork data
 type ArtworkPost = {
@@ -186,8 +187,8 @@ export default function ArtworkClient({ id }: { id: string }) {
   };
 
 
-  if (isLoading) return <div>Loading...</div>
-  if (!artwork) return <div>Artwork not found</div>
+  if (isLoading) return <LoadingPage />
+  if (!artwork) return <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">Artwork not found</div>
 
   return (
     <main className="container mx-auto py-8">

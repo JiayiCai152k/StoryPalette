@@ -169,12 +169,14 @@ export default function CreateFictionPage() {
             </div>
 
             {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-                <p className="text-sm text-gray-600 mt-1">
+              <div className="flex flex-col items-center justify-center py-4">
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
                   Uploading: {Math.round(uploadProgress)}%
                 </p>
               </div>

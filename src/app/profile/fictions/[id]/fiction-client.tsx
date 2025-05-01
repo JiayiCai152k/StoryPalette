@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { LoadingPage } from "@/components/ui/loading"
 
 type FictionContent = {
   content: string;
@@ -190,8 +191,8 @@ export default function FictionClient({ id }: { id: string }) {
     console.log('Test click detected!');
   };
 
-  if (isLoading) return <div>Loading...</div>
-  if (!fiction) return <div>Fiction not found</div>
+  if (isLoading) return <LoadingPage />
+  if (!fiction) return <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">Fiction not found</div>
 
   return (
     <main className="container mx-auto py-8">
