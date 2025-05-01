@@ -86,4 +86,45 @@ export async function GET(
       { status: 500 }
     )
   }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const session = await auth.api.getSession(({
+    headers: await headers()
+  }))
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  try {
+    // First check if the user owns the fiction
+    const [fiction] = await db
+      .select({ userId: posts.userId })
+      .from(posts)
+      .where(eq(posts.id, id))
+
+    if (!fiction) {
+      return NextResponse.json({ error: "Fiction not found" }, { status: 404 })
+    }
+
+    if (fiction.userId !== session.user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+
+    // Delete the fiction
+    await db.delete(posts).where(eq(posts.id, id))
+
+    return NextResponse.json({ message: "Fiction deleted successfully" })
+  } catch (error) {
+    console.error('Error deleting fiction:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete fiction' },
+      { status: 500 }
+    )
+  }
 } 

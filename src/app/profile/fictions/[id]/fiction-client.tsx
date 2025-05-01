@@ -3,11 +3,22 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Heart, Share2, BookmarkPlus, MessageSquare, Check } from "lucide-react"
+import { Heart, Share2, BookmarkPlus, MessageSquare, Check, Trash2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDistanceToNow } from "date-fns"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   Tooltip,
   TooltipContent,
@@ -56,7 +67,7 @@ type Comment = {
 }
 
 
-export default function FictionClient({ id }: { id: string }) {
+export default function FictionClient({ id, isOwner }: { id: string; isOwner: boolean }) {
   const [fiction, setFiction] = useState<FictionPost | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [liked, setLiked] = useState(false)
@@ -64,6 +75,7 @@ export default function FictionClient({ id }: { id: string }) {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState("")
   const [isCommentLoading, setIsCommentLoading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -187,6 +199,28 @@ export default function FictionClient({ id }: { id: string }) {
     }
   }
 
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/fiction/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete fiction')
+      }
+
+      toast.success('Fiction deleted successfully')
+      router.push('/profile')
+      router.refresh()
+    } catch (error) {
+      console.error('Error deleting fiction:', error)
+      toast.error('Failed to delete fiction')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const testClick = () => {
     console.log('Test click detected!');
   };
@@ -216,9 +250,6 @@ export default function FictionClient({ id }: { id: string }) {
                 <Heart className={`h-5 w-5 ${liked ? "fill-current" : ""}`} />
                 <span className="text-sm">{likeCount > 0 ? likeCount : ""}</span>
               </Button>
-              <div className="relative">
-
-              </div>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -312,6 +343,42 @@ export default function FictionClient({ id }: { id: string }) {
               </div>
             </TabsContent>
           </Tabs>
+
+          {isOwner && (
+            <div className="flex justify-end mt-6">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Fiction
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your fiction
+                      and remove it from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </CardContent>
       </Card>
     </main>

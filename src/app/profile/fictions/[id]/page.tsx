@@ -1,21 +1,24 @@
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
-import { redirect } from "next/navigation"
 import FictionClient from "./fiction-client"
+import { db } from "@/db"
+import { posts } from "@/db/schema/content"
+import { eq } from "drizzle-orm"
 
-export default async function FictionPage({ 
-  params 
-}: { 
-  params: Promise<{ id: string }> 
-}) {
+export default async function FictionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const session = await auth.api.getSession(({
+  const session = await auth.api.getSession({
     headers: await headers()
-  }))
+  })
 
-  if (!session) {
-    redirect('/login')
-  }
-  
-  return <FictionClient id={id} />
+  // Fetch the fiction's user ID to check ownership
+  const fiction = await db
+    .select({ userId: posts.userId })
+    .from(posts)
+    .where(eq(posts.id, id))
+    .limit(1)
+
+  const isOwner = session?.user?.id === fiction[0]?.userId
+
+  return <FictionClient id={id} isOwner={isOwner} />
 } 

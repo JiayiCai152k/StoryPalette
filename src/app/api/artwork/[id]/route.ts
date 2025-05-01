@@ -96,3 +96,44 @@ export async function GET(
     )
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const id = (await params).id;
+  const session = await auth.api.getSession(({
+    headers: await headers()
+  }))
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  try {
+    // First check if the user owns the artwork
+    const [artwork] = await db
+      .select({ userId: posts.userId })
+      .from(posts)
+      .where(eq(posts.id, id))
+
+    if (!artwork) {
+      return NextResponse.json({ error: "Artwork not found" }, { status: 404 })
+    }
+
+    if (artwork.userId !== session.user.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+
+    // Delete the artwork
+    await db.delete(posts).where(eq(posts.id, id))
+
+    return NextResponse.json({ message: "Artwork deleted successfully" })
+  } catch (error) {
+    console.error('Error deleting artwork:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete artwork' },
+      { status: 500 }
+    )
+  }
+}

@@ -4,11 +4,22 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Heart, Share2, BookmarkPlus, MessageSquare, Check } from "lucide-react"
+import { Heart, Share2, BookmarkPlus, MessageSquare, Check, Trash2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDistanceToNow } from "date-fns"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   Tooltip,
   TooltipContent,
@@ -50,7 +61,7 @@ type Comment = {
 }
 
 // Make sure to return JSX from the component
-export default function ArtworkClient({ id }: { id: string }) {
+export default function ArtworkClient({ id, isOwner }: { id: string; isOwner: boolean }) {
   const [artwork, setArtwork] = useState<ArtworkPost | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [liked, setLiked] = useState(false)
@@ -58,7 +69,7 @@ export default function ArtworkClient({ id }: { id: string }) {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState("")
   const [isCommentLoading, setIsCommentLoading] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -182,6 +193,28 @@ export default function ArtworkClient({ id }: { id: string }) {
     }
   }
 
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/artwork/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete artwork')
+      }
+
+      toast.success('Artwork deleted successfully')
+      router.push('/profile')
+      router.refresh()
+    } catch (error) {
+      console.error('Error deleting artwork:', error)
+      toast.error('Failed to delete artwork')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const testClick = () => {
     console.log('Test click detected!');
   };
@@ -253,7 +286,7 @@ export default function ArtworkClient({ id }: { id: string }) {
           {artwork.description && (
             <p className="text-muted-foreground mb-4">{artwork.description}</p>
           )}
-          {artwork.tags.length > 0 && (
+          {artwork.tags && artwork.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {artwork.tags.map((tag) => tag && tag.name && (
                 <span
@@ -293,7 +326,7 @@ export default function ArtworkClient({ id }: { id: string }) {
               <div className="space-y-4">
                 {comments.length > 0 ? (
                   comments.map((comment) => (
-                    <div key={comment.id} className="flex gap-4 p-4 border rounded-lg">
+                    <div key={comment.id} className="flex gap-4 p-4 border rounded-lg bg-muted/20">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={comment.user.image || ""} alt={comment.user.name} />
                         <AvatarFallback>
@@ -307,18 +340,55 @@ export default function ArtworkClient({ id }: { id: string }) {
                             {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                           </span>
                         </div>
-                        <p className="mt-2 text-sm">{comment.content}</p>
+                        <p className="mt-2 text-sm whitespace-pre-wrap">{comment.content}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground py-6">
-                    No comments yet. Be the first to comment!
-                  </p>
+                  <div className="text-center text-muted-foreground py-10 border border-dashed rounded-lg">
+                    <MessageSquare className="h-10 w-10 mx-auto mb-2 opacity-20" />
+                    <p>No comments yet. Be the first to comment!</p>
+                  </div>
                 )}
               </div>
             </TabsContent>
           </Tabs>
+
+          {isOwner && (
+            <div className="flex justify-end mt-6">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Artwork
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your artwork
+                      and remove it from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </CardContent>
       </Card>
     </main>
