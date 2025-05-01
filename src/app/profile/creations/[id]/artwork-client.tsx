@@ -254,7 +254,7 @@ export default function ArtworkClient({ id }: { id: string }) {
           )}
           {artwork.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {artwork.tags.map((tag) => (
+              {artwork.tags.map((tag) => tag && tag.name && (
                 <span
                   key={tag.id}
                   className="px-2 py-1 bg-secondary rounded-full text-sm"

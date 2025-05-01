@@ -244,9 +244,9 @@ export default function FictionClient({ id }: { id: string }) {
               paragraph ? <p key={index}>{paragraph}</p> : <br key={index} />
             ))}
           </div>
-          {fiction.tags.length > 0 && (
+          {fiction.tags && fiction.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-8">
-              {fiction.tags.map((tag) => (
+              {fiction.tags.map((tag) => tag && tag.name && (
                 <span
                   key={tag.id}
                   className="px-2 py-1 bg-secondary rounded-full text-sm"
