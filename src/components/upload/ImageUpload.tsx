@@ -85,7 +85,7 @@ export function ImageUpload({ onImageSelect, onUploadProgress }: ImageUploadProp
           </p>
         )}
         <p className="mt-2 text-sm text-muted-foreground">
-          PNG, JPG, GIF up to 10MB
+          PNG, JPG, GIF up to 5MB
         </p>
       </div>
     </div>
